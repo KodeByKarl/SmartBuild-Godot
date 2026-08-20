@@ -1,0 +1,171 @@
+[gd_scene format=3 uid="uid://swi5c1285112"]
+
+[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_33dst"]
+[ext_resource type="FontFile" uid="uid://0bu1yjprpme5" path="res://assets/fonts/gsflex_medium.ttf" id="3_33dst"]
+[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="4_ydr85"]
+[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="5_n1kpm"]
+[ext_resource type="FontFile" uid="uid://dlpxkp5a1u7vm" path="res://assets/fonts/gsflex_semibold.ttf" id="6_nsbpo"]
+[ext_resource type="Texture2D" uid="uid://dnrvxul7xncqs" path="res://assets/images/slide8.png" id="6_pyti7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xrivr"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_13qdw"]
+line_spacing = -16.0
+font = ExtResource("4_ydr85")
+font_size = 64
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_xrivr"]
+line_spacing = 0.0
+font = ExtResource("3_33dst")
+font_size = 28
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_b1lj4"]
+line_spacing = 0.0
+font = ExtResource("5_n1kpm")
+font_size = 24
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_njqwk"]
+line_spacing = 0.0
+font = ExtResource("6_nsbpo")
+font_size = 24
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="Slide8" type="Control" unique_id=2018901234]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1836127009]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=110319325]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=2009989624]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xrivr")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=1166791021]
+visible = false
+layout_mode = 0
+offset_right = 315.0
+offset_bottom = 306.0
+texture = ExtResource("1_33dst")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=1619499398]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=1959720830]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Container" type="Container" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2134145695]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=168099918]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=326913882]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=529048433]
+layout_mode = 2
+text = "STEP 1 - IDENTIFY THE HAZARD"
+label_settings = SubResource("LabelSettings_13qdw")
+autowrap_mode = 3
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=2030344035]
+propagate_maximum_size = true
+layout_mode = 2
+offset_transform_pivot_ratio = Vector2(0, 0)
+offset_transform_visual_only = false
+theme_override_constants/line_spacing = 0
+theme_override_font_sizes/font_size = 32
+text = "Before fixing problems, look around and identify hazards."
+label_settings = SubResource("LabelSettings_xrivr")
+autowrap_mode = 3
+
+[node name="Container" type="Container" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1426682639]
+custom_minimum_size = Vector2(0, 20)
+custom_maximum_size = Vector2(-1, 20)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label3" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=897740190]
+layout_mode = 2
+text = "A hazard is anything that can cause harm. Common examples in a computer servicing environment include: tangled electrical cords, unstable stacked objects, excessive noise, electrical hazards, and unsafe work areas."
+label_settings = SubResource("LabelSettings_b1lj4")
+autowrap_mode = 3
+
+[node name="Container2" type="Container" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=840616761]
+custom_minimum_size = Vector2(0, 20)
+custom_maximum_size = Vector2(-1, 20)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label4" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=135827096]
+layout_mode = 2
+text = "Always assess your surroundings before beginning any repair or maintenance task."
+label_settings = SubResource("LabelSettings_njqwk")
+autowrap_mode = 3
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=804241]
+layout_mode = 2
+ratio = 1.005
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AspectRatioContainer" unique_id=131280379]
+layout_mode = 2
+texture = ExtResource("6_pyti7")
+
+[node name="Container2" type="Container" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=826132493]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3

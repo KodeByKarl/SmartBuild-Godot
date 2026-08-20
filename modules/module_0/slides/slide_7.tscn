@@ -1,0 +1,242 @@
+[gd_scene format=3 uid="uid://cm8dxlaouca6d"]
+
+[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_iwu0m"]
+[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="2_farlc"]
+[ext_resource type="FontFile" uid="uid://0bu1yjprpme5" path="res://assets/fonts/gsflex_medium.ttf" id="3_jpvwr"]
+[ext_resource type="Texture2D" uid="uid://puqg66dv7aed" path="res://assets/images/slide7.png" id="4_iwu0m"]
+[ext_resource type="FontFile" uid="uid://wlkxj4ynk1k8" path="res://assets/fonts/gsflex_bold.ttf" id="5_0ab8s"]
+[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="6_rix8y"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uguh5"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_18kx6"]
+line_spacing = -20.0
+font = ExtResource("2_farlc")
+font_size = 64
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_aqfrw"]
+font = ExtResource("3_jpvwr")
+font_size = 28
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iaq4q"]
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_hphpu"]
+font = ExtResource("5_0ab8s")
+font_size = 20
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_20jvh"]
+font = ExtResource("6_rix8y")
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wvktq"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Slide7" type="Control" unique_id=172759197]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2134592878]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1926382532]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=1138905349]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_uguh5")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=1959588894]
+visible = false
+layout_mode = 0
+offset_right = 315.0
+offset_bottom = 306.0
+texture = ExtResource("1_iwu0m")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=1767749313]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=154805996]
+layout_mode = 2
+theme_override_constants/separation = 48
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=23904855]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2021317708]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=57264559]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "WORK SAFELY: OHS"
+label_settings = SubResource("LabelSettings_18kx6")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1413590075]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Occupational Health and Safety for Computer Technicians"
+label_settings = SubResource("LabelSettings_aqfrw")
+autowrap_mode = 3
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=395124283]
+layout_mode = 2
+size_flags_vertical = 0
+ratio = 1.73
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AspectRatioContainer" unique_id=1780583311]
+layout_mode = 2
+texture = ExtResource("4_iwu0m")
+
+[node name="Container" type="Container" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=256106242]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1639397784]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1254342311]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+theme_override_styles/panel = SubResource("StyleBoxFlat_iaq4q")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer" unique_id=29750945]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer/MarginContainer" unique_id=819063832]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer" unique_id=1703538839]
+layout_mode = 2
+text = "What is OHS?"
+label_settings = SubResource("LabelSettings_hphpu")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer" unique_id=1465259310]
+layout_mode = 2
+text = "OHS protects the health and safety of workers in the workplace. For technicians, safety is critical due to electrical equipment, sensitive components, and specialized tools."
+label_settings = SubResource("LabelSettings_20jvh")
+autowrap_mode = 3
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=933698707]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+theme_override_styles/panel = SubResource("StyleBoxFlat_wvktq")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer2" unique_id=139466504]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer2/MarginContainer" unique_id=1888134237]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=809427526]
+layout_mode = 2
+text = "Three-Step Process"
+label_settings = SubResource("LabelSettings_hphpu")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=1298015751]
+layout_mode = 2
+text = "1. IDENTIFY - Spot Hazards
+2. ASSESS - Evaluate Risk
+3. CONTORL  - Take action to reduce harm"
+label_settings = SubResource("LabelSettings_20jvh")
+autowrap_mode = 3
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1310883034]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+theme_override_styles/panel = SubResource("StyleBoxFlat_iaq4q")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer3" unique_id=1838403488]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer3/MarginContainer" unique_id=870322096]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1979394853]
+layout_mode = 2
+text = "Key Reminder"
+label_settings = SubResource("LabelSettings_hphpu")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1425259138]
+layout_mode = 2
+text = "A good technicians protects both people and equipment. Safety is not optional - it is part of every task."
+label_settings = SubResource("LabelSettings_20jvh")
+autowrap_mode = 3

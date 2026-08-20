@@ -1,0 +1,264 @@
+[gd_scene format=3 uid="uid://dwxt6l3npk03o"]
+
+[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_cvo23"]
+[ext_resource type="FontFile" uid="uid://wlkxj4ynk1k8" path="res://assets/fonts/gsflex_bold.ttf" id="2_0de4v"]
+[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="3_3f8xl"]
+[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="4_yqfi2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kk77r"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r68yi"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_xhqhf"]
+font = ExtResource("2_0de4v")
+font_size = 24
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_xqgcc"]
+font = ExtResource("3_3f8xl")
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ibymd"]
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_xrivr"]
+line_spacing = -12.0
+font = ExtResource("4_yqfi2")
+font_size = 60
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_13qdw"]
+font = ExtResource("3_3f8xl")
+font_size = 32
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="Slide6" type="Control" unique_id=640499896]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1909797731]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1746359627]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=610328300]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kk77r")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=2124384018]
+visible = false
+layout_mode = 0
+offset_right = 315.0
+offset_bottom = 306.0
+texture = ExtResource("1_cvo23")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=667942525]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=290768256]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1474008116]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer" unique_id=1365771012]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer" unique_id=1987645417]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=2101751968]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_r68yi")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer2" unique_id=334789019]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer" unique_id=998154030]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/VBoxContainer" unique_id=699341042]
+layout_mode = 2
+text = "Computer Systems Basics"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/VBoxContainer" unique_id=739966996]
+layout_mode = 2
+text = "Understand how computers work: input, process, output, and storage. Know the roles of key components like CPU, RAM, and storage devices."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=222476681]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ibymd")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer3" unique_id=1321817520]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer" unique_id=457637379]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=2125408091]
+layout_mode = 2
+text = "Troubleshooting & Tools"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=2125239833]
+layout_mode = 2
+text = "Diagnose hardware and software issues systematically. Use hand tools, ESD protection, and diagnostic equipment safely and correctly."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer" unique_id=2084971462]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=277777106]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ibymd")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer3" unique_id=2096718797]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer" unique_id=876224255]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=640059056]
+layout_mode = 2
+text = "Hardware Components"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1882973352]
+layout_mode = 2
+text = "Identify and handle internal parts: motherboard, CPU, RAM, storage, power supply, and expansion cards. Know how they connect and function together."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=174421730]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_r68yi")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer2" unique_id=2002086849]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer" unique_id=569252624]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=1931095226]
+layout_mode = 2
+text = "Safety, Communication & Teamwork"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=862806528]
+layout_mode = 2
+text = "Apply OHS principles on the job. Communicate technical information clearly to users and collaborate effectively with colleagues and teams."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1460837610]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1974956049]
+layout_mode = 2
+text = "WHAT KNOWLEDGE AND SKILLS DO I NEED?"
+label_settings = SubResource("LabelSettings_xrivr")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1365638112]
+layout_mode = 2
+text = "The stronger your fundamentals, the easier computer servicing tasks become."
+label_settings = SubResource("LabelSettings_13qdw")
+autowrap_mode = 3

@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://dwbqqmh3er7nu"]
+
+[ext_resource type="Script" uid="uid://b75yuekr7ummo" path="res://core/components/component_viewer.gd" id="1_1oda0"]
+[ext_resource type="PackedScene" uid="uid://dtxqcyab24xd7" path="res://core/components/models/RAM.tscn" id="2_1oda0"]
+
+[node name="ComponentViewer" type="Control" unique_id=1084183211]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_1oda0")
+model = ExtResource("2_1oda0")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=38611973]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=681243963]
+handle_input_locally = false
+size = Vector2i(917, 412)
+render_target_update_mode = 4
+
+[node name="World" type="Node3D" parent="SubViewportContainer/SubViewport" unique_id=1272647705]
+
+[node name="Camera" type="Camera3D" parent="SubViewportContainer/SubViewport/World" unique_id=1254053288]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+
+[node name="Light" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/World" unique_id=362588090]

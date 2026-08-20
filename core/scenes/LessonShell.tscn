@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://iodgweskq87n"]
+
+[ext_resource type="Script" uid="uid://c8sbltti5wqr8" path="res://core/scenes/lesson_container.gd" id="1_jbc3u"]
+[ext_resource type="PackedScene" uid="uid://dwbqqmh3er7nu" path="res://core/components/ComponentViewer.tscn" id="1_ue3md"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbc3u"]
+bg_color = Color(3.946722e-06, 0.7197592, 0.3381904, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xrivr"]
+bg_color = Color(3.465414e-06, 0.66331816, 0.8277336, 1)
+
+[node name="LessonShell" type="Control" unique_id=1839565412]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=235267259]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MainLayout" type="VBoxContainer" parent="Margin" unique_id=995463948]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/MainLayout" unique_id=776885048]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ModuleTitle" type="Label" parent="Margin/MainLayout/Header" unique_id=1875923684]
+layout_mode = 2
+text = "Module 0 - Introduction to CSS"
+
+[node name="LessonTitle" type="Label" parent="Margin/MainLayout/Header" unique_id=565288308]
+layout_mode = 2
+text = "Lesson 1"
+
+[node name="Control" type="Control" parent="Margin/MainLayout/Header" unique_id=696756220]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Progress" type="Label" parent="Margin/MainLayout/Header" unique_id=1518535290]
+layout_mode = 2
+text = "1/5"
+
+[node name="ContentArea" type="PanelContainer" parent="Margin/MainLayout" unique_id=904136585]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_jbc3u")
+
+[node name="LessonContent" type="PanelContainer" parent="Margin/MainLayout/ContentArea" unique_id=1322411357]
+layout_mode = 2
+
+[node name="LessonContainer" type="VBoxContainer" parent="Margin/MainLayout/ContentArea/LessonContent" unique_id=358710912]
+layout_mode = 2
+script = ExtResource("1_jbc3u")
+
+[node name="TitleContainer" type="HBoxContainer" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer" unique_id=1253576665]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Title" type="Label" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer/TitleContainer" unique_id=413673953]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+text = "Why is CSS relevant?"
+autowrap_mode = 3
+
+[node name="Body" type="HBoxContainer" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer" unique_id=471595759]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VisualArea" type="PanelContainer" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer/Body" unique_id=939890083]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+theme_override_styles/panel = SubResource("StyleBoxFlat_xrivr")
+
+[node name="ComponentViewer" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer/Body/VisualArea" unique_id=1084183211 instance=ExtResource("1_ue3md")]
+layout_mode = 2
+
+[node name="InfoArea" type="PanelContainer" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer/Body" unique_id=61624849]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_xrivr")
+
+[node name="Description" type="Label" parent="Margin/MainLayout/ContentArea/LessonContent/LessonContainer/Body" unique_id=922938067]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+text = "Computer Systems Servicing provides important skills for maintaining and supporting computer systems."
+autowrap_mode = 3
+
+[node name="Navigation" type="HBoxContainer" parent="Margin/MainLayout" unique_id=1364848121]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="Margin/MainLayout/Navigation" unique_id=1479785689]
+layout_mode = 2
+text = "Navigation"
