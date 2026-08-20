@@ -1,0 +1,499 @@
+[gd_scene format=3 uid="uid://bh8jpuh0h7yu7"]
+
+[ext_resource type="PackedScene" uid="uid://dhaa1ernckhi6" path="res://modules/module_0/assets/components/Card3DViewer/Card3DViewer.tscn" id="1_g2pr3"]
+[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_ulkle"]
+[ext_resource type="Script" uid="uid://bm31h8fnbx6ec" path="res://modules/module_0/slides/scripts/slide_12.gd" id="1_xep10"]
+[ext_resource type="FontFile" uid="uid://wlkxj4ynk1k8" path="res://assets/fonts/gsflex_bold.ttf" id="2_g2pr3"]
+[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="3_xep10"]
+[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="4_cn6ji"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kk77r"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xep10"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8mqbr"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.045349985, 0.54100925, 0.7319913, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i4i0x"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fa2hh"]
+bg_color = Color(0.047058824, 0.5411765, 0.73333335, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_xhqhf"]
+font = ExtResource("2_g2pr3")
+font_size = 24
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_xqgcc"]
+font = ExtResource("3_xep10")
+font_size = 24
+font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cn6ji"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_08vui"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.01088081, 0.16754666, 0.23969108, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_57rk8"]
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jp5cr"]
+bg_color = Color(0.011764706, 0.16862746, 0.23921569, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ibymd"]
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r68yi"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3pirm"]
+bg_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ydubc"]
+bg_color = Color(0.011764706, 0.16862746, 0.23921569, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yqcsd"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gmj8i"]
+bg_color = Color(0.047058824, 0.5411765, 0.73333335, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_xrivr"]
+line_spacing = -12.0
+font = ExtResource("4_cn6ji")
+font_size = 60
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_13qdw"]
+font = ExtResource("3_xep10")
+font_size = 32
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_ulkle"]
+font = ExtResource("3_xep10")
+font_size = 20
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 0.7647059)
+
+[node name="Slide12" type="Control" unique_id=640499896]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_xep10")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1909797731]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1746359627]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Card3dViewer" parent="MarginContainer" unique_id=976603595 instance=ExtResource("1_g2pr3")]
+layout_mode = 2
+
+[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=610328300]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kk77r")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=2124384018]
+visible = false
+layout_mode = 0
+offset_right = 315.0
+offset_bottom = 306.0
+texture = ExtResource("1_ulkle")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=667942525]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=290768256]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1365771012]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer" unique_id=1987645417]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Button" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer" unique_id=726509571]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_xep10")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_8mqbr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_i4i0x")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_fa2hh")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button" unique_id=334789019]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button/MarginContainer" unique_id=998154030]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button/MarginContainer/VBoxContainer" unique_id=699341042]
+layout_mode = 2
+text = "SUPERCOMPUTER"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button/MarginContainer/VBoxContainer" unique_id=739966996]
+layout_mode = 2
+text = "Extremely powerful machines used for complex research weather forecasting, and scientific exploration."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="Button2" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer" unique_id=1117103889]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_cn6ji")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_08vui")
+theme_override_styles/hover = SubResource("StyleBoxFlat_57rk8")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_jp5cr")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button2" unique_id=621421521]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button2/MarginContainer" unique_id=1464105078]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button2/MarginContainer/VBoxContainer" unique_id=171172070]
+layout_mode = 2
+text = "MINICOMPUTER"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/Button2/MarginContainer/VBoxContainer" unique_id=89316833]
+layout_mode = 2
+text = "Midrange systems that support multiple users and are used in business and engineering environments."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer" unique_id=222476681]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ibymd")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/PanelContainer3" unique_id=1321817520]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer" unique_id=457637379]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=2125408091]
+layout_mode = 2
+text = "MINICOMPUTER"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=2125239833]
+layout_mode = 2
+text = "Midrange systems that support multiple users and are used in business and engineering environments."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer" unique_id=2084971462]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2" unique_id=277777106]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ibymd")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer3" unique_id=2096718797]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer" unique_id=876224255]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=640059056]
+layout_mode = 2
+text = "MAINFRAME"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1882973352]
+layout_mode = 2
+text = "Large-scale systems that handle massive amounts of data and support many users simultaneously."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2" unique_id=174421730]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_r68yi")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer2" unique_id=2002086849]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer" unique_id=569252624]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=1931095226]
+layout_mode = 2
+text = "MICROCOMPUTER"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=862806528]
+layout_mode = 2
+text = "The most common type, including desktops, laptops, tablets, and smartphones used daily."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="Button2" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2" unique_id=642569662]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_cn6ji")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_08vui")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3pirm")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_ydubc")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button2" unique_id=967357318]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button2/MarginContainer" unique_id=668137495]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button2/MarginContainer/VBoxContainer" unique_id=1140625841]
+layout_mode = 2
+text = "MAINFRAME"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button2/MarginContainer/VBoxContainer" unique_id=2034977453]
+layout_mode = 2
+text = "Midrange systems that support multiple users and are used in business and engineering environments."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="Button" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2" unique_id=990248827]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_xep10")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_8mqbr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_yqcsd")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_gmj8i")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button" unique_id=27787461]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button/MarginContainer" unique_id=1594990894]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button/MarginContainer/VBoxContainer" unique_id=555241340]
+layout_mode = 2
+text = "MICROCOMPUTER"
+label_settings = SubResource("LabelSettings_xhqhf")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button/MarginContainer/VBoxContainer" unique_id=1819067798]
+layout_mode = 2
+text = "The most common type, including desktops, laptops, tablets, and smartphones used daily."
+label_settings = SubResource("LabelSettings_xqgcc")
+autowrap_mode = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1474008116]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1460837610]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1974956049]
+layout_mode = 2
+text = "DIFFERENT TYPES OF COMPUTERS"
+label_settings = SubResource("LabelSettings_xrivr")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1365638112]
+layout_mode = 2
+text = "Categorized by Size and Function"
+label_settings = SubResource("LabelSettings_13qdw")
+autowrap_mode = 3
+
+[node name="Label3" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer" unique_id=34061326]
+layout_mode = 2
+text = "(Click a card to see an example)"
+label_settings = SubResource("LabelSettings_ulkle")
+autowrap_mode = 3

@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dtxqcyab24xd7"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_xrivr"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ixrft"]
+
+[node name="Ram" type="Node3D" unique_id=537306039]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1753793370]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.3, 1)
+mesh = SubResource("PrismMesh_xrivr")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1258550886]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=944168609]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.3, 1)
+shape = SubResource("BoxShape3D_ixrft")

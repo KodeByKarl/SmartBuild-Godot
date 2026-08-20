@@ -1,0 +1,11 @@
+Model Information:
+* title:	Placa base
+* source:	https://sketchfab.com/3d-models/placa-base-c933af7599b84817bde3b9dcdd6623b7
+* author:	Proxecto cREAgal (https://sketchfab.com/proxecto_creagal)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Placa base" (https://sketchfab.com/3d-models/placa-base-c933af7599b84817bde3b9dcdd6623b7) by Proxecto cREAgal (https://sketchfab.com/proxecto_creagal) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

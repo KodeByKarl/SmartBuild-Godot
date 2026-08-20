@@ -1,0 +1,273 @@
+[gd_scene format=3 uid="uid://133mglaeyq3f"]
+
+[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_aiksn"]
+[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="2_vro11"]
+[ext_resource type="FontFile" uid="uid://0bu1yjprpme5" path="res://assets/fonts/gsflex_medium.ttf" id="3_b35k4"]
+[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="4_b8nny"]
+[ext_resource type="Script" uid="uid://xjgbm7pbhdsa" path="res://modules/module_0/slides/scripts/slide_11_node_3d.gd" id="5_b35k4"]
+[ext_resource type="PackedScene" uid="uid://dijaa4777n3pd" path="res://modules/module_0/assets/models/office_worker/scene.gltf" id="6_b8nny"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gj70g"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_4up83"]
+line_spacing = -20.0
+font = ExtResource("2_vro11")
+font_size = 72
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_wd2pc"]
+font = ExtResource("3_b35k4")
+font_size = 40
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_wig3k"]
+line_spacing = 0.0
+font = ExtResource("4_b8nny")
+font_size = 24
+font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lw7io"]
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="Animation" id="Animation_gj70g"]
+resource_name = "CameraLoop"
+length = 10.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera3D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = false
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 3, 4, 6, 7, 9, 10),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.09960269, 1.1442184, -0.27765548), Vector3(-0.1, 1.144, -0.278), Vector3(-0.09, 0.635, -1.19), Vector3(-0.09, 0.63499993, -1.19), Vector3(-0.09999999, 0.99500006, -0.21299958), Vector3(-0.09999999, 0.99500006, -0.21299958), Vector3(1.285, 1.509, 1.4159999), Vector3(1.285, 1.509, 1.4159999)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera3D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = false
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1, 3, 4, 6, 7, 9, 10),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-1.0321561, -0.008726621, 0), Vector3(-1.0314896, -0.008726646, 0), Vector3(0.42062435, -3.1206486, 0.017453292), Vector3(0.42062432, -3.1206486, 0), Vector3(-0.28972462, -0.01745329, 0), Vector3(-0.2897246, -0.01745329, 0), Vector3(-0.27227136, 0.6230825, 0), Vector3(-0.2722714, 0.6230825, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_b35k4"]
+length = 10.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera3D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 3, 4, 6, 7, 9, 10),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.09960269, 1.1442184, -0.27765548), Vector3(-0.09960269, 1.1442184, -0.27765548), Vector3(-0.09, 0.635, -1.19), Vector3(-0.09, 0.635, -1.19), Vector3(-0.1, 0.995, -0.213), Vector3(-0.1, 0.995, -0.213), Vector3(1.285, 1.509, 1.416), Vector3(1.285, 1.509, 1.416)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera3D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1, 3, 4, 6, 7, 9, 10),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-1.0321561, -0.008726621, 0), Vector3(-1.0321561, -0.008726621, 0), Vector3(0.42062435, -3.1206486, 0.017453292), Vector3(0.42062438, -3.1206486, 0.017453292), Vector3(-0.28972465, -0.017453292, 0), Vector3(-0.28972465, -0.017453292, 0), Vector3(-0.27227136, 0.6230825, 0), Vector3(-0.2722714, 0.6230825, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4up83"]
+_data = {
+&"CameraLoop": SubResource("Animation_gj70g"),
+&"RESET": SubResource("Animation_b35k4")
+}
+
+[sub_resource type="Environment" id="Environment_xrivr"]
+
+[node name="Slide11" type="Control" unique_id=1019984647]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=368013947]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1686970633]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=1640257304]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gj70g")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=241702282]
+visible = false
+layout_mode = 0
+offset_right = 315.0
+offset_bottom = 306.0
+texture = ExtResource("1_aiksn")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=468044284]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=276905436]
+layout_mode = 2
+theme_override_constants/separation = 48
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=243136131]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=1452698075]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "WHAT IS A COMPUTER?"
+label_settings = SubResource("LabelSettings_4up83")
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=407835779]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Understanding the Basics of Computing"
+label_settings = SubResource("LabelSettings_wd2pc")
+autowrap_mode = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=812161355]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=744692392]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=474234824]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "A computer is a device that accepts digital data, processes it according to a set of instructions, and produces meaningful results. It follows a simple but powerful model:"
+label_settings = SubResource("LabelSettings_wig3k")
+autowrap_mode = 3
+
+[node name="Label3" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=676287375]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "INPUT → PROCESS → OUTPUT"
+label_settings = SubResource("LabelSettings_wig3k")
+autowrap_mode = 3
+
+[node name="Label4" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1804586017]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Computers help us process information, store data, communicate, and perform tasks efficiently. From classrooms to businesses, computers connect people to digital services and make everyday work faster smarter."
+label_settings = SubResource("LabelSettings_wig3k")
+autowrap_mode = 3
+
+[node name="BoxContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1581144610]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_lw7io")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer" unique_id=2143125816]
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer" unique_id=1999228772]
+handle_input_locally = false
+size = Vector2i(556, 402)
+render_target_update_mode = 4
+
+[node name="Node3D" type="Node3D" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport" unique_id=212445965]
+script = ExtResource("5_b35k4")
+
+[node name="SpotLight3D" type="SpotLight3D" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=1151911983]
+transform = Transform3D(0.8429359, -0.39872468, -0.36121696, -0.1560775, -0.8237436, 0.5450563, -0.51487756, -0.40306965, -0.756595, -1.313967, 2.1912796, -1.836384)
+visible = false
+light_energy = 8.0
+light_indirect_energy = 1.091
+spot_range = 4.339
+spot_angle = 36.48763
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=377535128]
+transform = Transform3D(-0.9299798, 0.30849275, 0.1999244, -0.15607749, -0.8237436, 0.5450563, 0.3328324, 0.47568765, 0.8142139, -1.313967, 2.1912796, 1.8181925)
+visible = false
+light_energy = 8.0
+light_indirect_energy = 1.091
+spot_range = 4.339
+spot_angle = 36.48763
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=989489179]
+transform = Transform3D(-0.9851093, 0.15582082, -0.07266036, 7.389292e-08, 0.42261824, 0.9063078, 0.17192923, 0.89281225, -0.41632518, 0, 1.8777527, -5.0615816)
+light_energy = 1.94
+
+[node name="Sketchfab_Scene" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=57662370 instance=ExtResource("6_b8nny")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=543721553]
+transform = Transform3D(0.99996185, 0.0074908976, -0.004476431, 0, 0.5129692, 0.858407, 0.008726509, -0.8583743, 0.51294965, -0.09960269, 1.1442184, -0.27765548)
+current = true
+fov = 29.581299
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=595762404]
+libraries/ = SubResource("AnimationLibrary_4up83")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/BoxContainer/SubViewportContainer/SubViewport/Node3D" unique_id=1380946820]
+environment = SubResource("Environment_xrivr")

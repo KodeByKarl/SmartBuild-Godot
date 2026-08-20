@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://db0rh2u8dlvqx"]
+
+[ext_resource type="Script" uid="uid://bqv14jobdm3fc" path="res://modules/module_0/Main.gd" id="1_ah0a8"]
+[ext_resource type="Texture2D" uid="uid://doie1s0qqfie2" path="res://assets/icons/arrow_circle_left.svg" id="2_gip54"]
+[ext_resource type="Texture2D" uid="uid://ca44mgh64socj" path="res://assets/icons/arrow_circle_right.svg" id="3_fjfop"]
+[ext_resource type="Texture2D" uid="uid://b1nbx0kyhqbnq" path="res://assets/icons/exit_the_app.svg" id="4_d81l5"]
+
+[node name="Main" type="Control" unique_id=57733180]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ah0a8")
+
+[node name="Background" type="ColorRect" parent="." unique_id=770744797]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="Wrapper" type="VBoxContainer" parent="." unique_id=991225544]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Presentation" type="MarginContainer" parent="Wrapper" unique_id=1917218960]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Content" type="VBoxContainer" parent="Wrapper/Presentation" unique_id=75145440]
+layout_mode = 2
+alignment = 1
+
+[node name="Navigation" type="HBoxContainer" parent="Wrapper" unique_id=1093646969]
+layout_mode = 2
+size_flags_vertical = 8
+alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Wrapper/Navigation" unique_id=2132771581]
+layout_mode = 2
+alignment = 1
+
+[node name="PreviousButton" type="Button" parent="Wrapper/Navigation/Buttons" unique_id=1054382000]
+custom_minimum_size = Vector2(40, 40)
+custom_maximum_size = Vector2(40, 40)
+layout_mode = 2
+icon = ExtResource("2_gip54")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Spacer3" type="Container" parent="Wrapper/Navigation/Buttons" unique_id=1018452852]
+custom_minimum_size = Vector2(12, 0)
+custom_maximum_size = Vector2(12, -1)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NextButton" type="Button" parent="Wrapper/Navigation/Buttons" unique_id=456828322]
+custom_minimum_size = Vector2(40, 40)
+custom_maximum_size = Vector2(40, 40)
+layout_mode = 2
+icon = ExtResource("3_fjfop")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Spacer" type="Container" parent="Wrapper/Navigation" unique_id=634750653]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PageNumberLabel" type="Label" parent="Wrapper/Navigation" unique_id=593834892]
+layout_mode = 2
+text = "1 / 20"
+
+[node name="Spacer2" type="Container" parent="Wrapper/Navigation" unique_id=1265187390]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExitButton" type="Button" parent="Wrapper/Navigation" unique_id=1227360087]
+custom_minimum_size = Vector2(40, 40)
+custom_maximum_size = Vector2(40, 40)
+layout_mode = 2
+icon = ExtResource("4_d81l5")
+icon_alignment = 1
+expand_icon = true

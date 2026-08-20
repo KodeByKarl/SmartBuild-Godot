@@ -1,0 +1,11 @@
+Model Information:
+* title:	Main Frame Computer
+* source:	https://sketchfab.com/3d-models/main-frame-computer-3b3c00680f5e4827bebef16374d70202
+* author:	ARComputerFundamentals (https://sketchfab.com/adilaijaz10)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Main Frame Computer" (https://sketchfab.com/3d-models/main-frame-computer-3b3c00680f5e4827bebef16374d70202) by ARComputerFundamentals (https://sketchfab.com/adilaijaz10) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
