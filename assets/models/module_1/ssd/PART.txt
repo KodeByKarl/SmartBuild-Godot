@@ -1,0 +1,3 @@
+SSD Solid-State Drive
+scene.gltf — Sketchfab “SSD Solid-State Drive” by isnainul (CC-BY-4.0)
+Source upload: modules/module_3/models/ssd/

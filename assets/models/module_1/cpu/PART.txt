@@ -1,0 +1,2 @@
+PART: CPU — Sketchfab AquaEquinox Intel 486DX
+FILE: scene.gltf

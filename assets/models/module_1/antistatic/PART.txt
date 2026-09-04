@@ -1,0 +1,3 @@
+﻿PART: Anti-static Kit — detailed procedural ESD mat + wrist strap + coiled cord + alligator clip + ground plug
+FILE: model.tscn
+BUILT BY: assets/models/module_1/_factory/module_1_part_factory.gd → _build_antistatic

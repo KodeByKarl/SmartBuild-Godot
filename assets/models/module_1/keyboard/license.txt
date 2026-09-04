@@ -1,0 +1,8 @@
+Model Information:
+* title:	Mechanical Keyboard
+* source:	https://sketchfab.com/3d-models/mechanical-keyboard-95d050e7a5954ff6ac7fbe4ac5301b3c
+* author:	Flexryhe (https://sketchfab.com/flexryhe)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

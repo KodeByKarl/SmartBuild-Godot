@@ -1,0 +1,2 @@
+PART: Mouse — Sketchfab WeSVa
+FILE: scene.gltf

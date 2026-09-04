@@ -1,0 +1,4 @@
+﻿PART: Access Point
+MODULE: 2
+CATEGORY: Wireless
+FILE: model.tscn (procedural via Module2PartFactory)

@@ -4,11 +4,20 @@
 [ext_resource type="PackedScene" uid="uid://dwbqqmh3er7nu" path="res://core/components/ComponentViewer.tscn" id="2_uu6xs"]
 [ext_resource type="PackedScene" uid="uid://b0r42cbgp7hsd" path="res://core/components/models/TextComponent.tscn" id="3_r0du0"]
 
-[node name="Main" type="Node" unique_id=1923070001]
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_glv2v")
 
-[node name="Container" type="HBoxContainer" parent="." unique_id=913520961]
+[node name="Container" type="HBoxContainer" parent="."]
 visible = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -17,11 +26,11 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="VBox1" type="VBoxContainer" parent="Container" unique_id=472458178]
+[node name="VBox1" type="VBoxContainer" parent="Container"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="Container/VBox1" unique_id=1625254084]
+[node name="Label" type="Label" parent="Container/VBox1"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -30,16 +39,16 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="Button" type="Button" parent="Container/VBox1" unique_id=1905645753]
+[node name="Button" type="Button" parent="Container/VBox1"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "Send Pong"
 
-[node name="VBox2" type="VBoxContainer" parent="Container" unique_id=194417774]
+[node name="VBox2" type="VBoxContainer" parent="Container"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ComponentViewer" parent="Container/VBox2" unique_id=1084183211 instance=ExtResource("2_uu6xs")]
+[node name="ComponentViewer" parent="Container/VBox2" instance=ExtResource("2_uu6xs")]
 layout_mode = 2
 model = ExtResource("3_r0du0")

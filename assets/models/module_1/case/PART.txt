@@ -1,0 +1,2 @@
+PART: Computer Case — Sketchfab Meilov (PC model)
+FILE: scene.gltf

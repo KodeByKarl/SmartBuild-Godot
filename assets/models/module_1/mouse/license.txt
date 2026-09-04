@@ -1,0 +1,8 @@
+Model Information:
+* title:	Computer_Mouse
+* source:	https://sketchfab.com/3d-models/computer-mouse-bdf0433b65d943eebb35598e4f155150
+* author:	WeSVa (https://sketchfab.com/WSVideoCarta)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

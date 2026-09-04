@@ -1,0 +1,11 @@
+Model Information:
+* title:	Servers
+* source:	https://sketchfab.com/3d-models/servers-373409fcff8d4b48b34ea45b0891b691
+* author:	themighty808 (https://sketchfab.com/themighty808)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Servers" (https://sketchfab.com/3d-models/servers-373409fcff8d4b48b34ea45b0891b691) by themighty808 (https://sketchfab.com/themighty808) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

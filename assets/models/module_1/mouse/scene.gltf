@@ -1,0 +1,410 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3150,
+      "max": [
+        0.4909619688987732,
+        0.26336023211479187,
+        0.44901856780052185
+      ],
+      "min": [
+        -0.5719584226608276,
+        -0.0006334817735478282,
+        -0.44901856780052185
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 37800,
+      "componentType": 5126,
+      "count": 3150,
+      "max": [
+        0.9983019232749939,
+        0.9999973773956299,
+        0.9975658059120178
+      ],
+      "min": [
+        -0.9999586939811707,
+        -1.0,
+        -0.9975658059120178
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 3150,
+      "max": [
+        0.9999999403953552,
+        0.9999999403953552,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -0.9775885343551636,
+        -0.9999998807907104,
+        -1.0,
+        1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 3150,
+      "max": [
+        1.0,
+        0.9531866312026978
+      ],
+      "min": [
+        0.0,
+        7.134675979614258e-05
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 15840,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 75600,
+      "componentType": 5126,
+      "count": 618,
+      "max": [
+        1.093411922454834,
+        1.0,
+        1.093411922454834
+      ],
+      "min": [
+        -1.0934133529663086,
+        -1.0,
+        -1.093414068222046
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 83016,
+      "componentType": 5126,
+      "count": 618,
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "byteOffset": 50400,
+      "componentType": 5126,
+      "count": 618,
+      "max": [
+        1.0,
+        0.023769861087203026,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -0.8090136051177979,
+        -0.02376987412571907,
+        -1.0,
+        1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 25200,
+      "componentType": 5126,
+      "count": 618,
+      "max": [
+        0.9078673124313354,
+        0.5124704241752625
+      ],
+      "min": [
+        0.041212331503629684,
+        0.0
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 63360,
+      "componentType": 5125,
+      "count": 1440,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "WeSVa (https://sketchfab.com/WSVideoCarta)",
+      "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+      "source": "https://sketchfab.com/3d-models/computer-mouse-bdf0433b65d943eebb35598e4f155150",
+      "title": "Computer_Mouse"
+    },
+    "generator": "Sketchfab-16.59.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 69120,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 30144,
+      "byteOffset": 69120,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 90432,
+      "byteOffset": 99264,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 60288,
+      "byteOffset": 189696,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 249984,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/standardSurface1_baseColor.png"
+    },
+    {
+      "uri": "textures/standardSurface1_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/standardSurface1_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "standardSurface1",
+      "normalTexture": {
+        "index": 2
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "pPlane1_standardSurface1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "pCylinder1_standardSurface1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 6,
+            "POSITION": 5,
+            "TANGENT": 7,
+            "TEXCOORD_0": 8
+          },
+          "indices": 9,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Misha.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4,
+        6
+      ],
+      "name": "group1"
+    },
+    {
+      "children": [
+        5
+      ],
+      "matrix": [
+        7.5735626220703125,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        8.622209548950195,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        4.594274520874023,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "pPlane1"
+    },
+    {
+      "mesh": 0,
+      "name": "pPlane1_standardSurface1_0"
+    },
+    {
+      "children": [
+        7
+      ],
+      "matrix": [
+        0.450805127620697,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -2.6400076400199492e-17,
+        -0.11889537423849106,
+        0.0,
+        0.0,
+        0.450805127620697,
+        -1.0009884646071599e-16,
+        0.0,
+        -2.8925414085388184,
+        1.3986976146697998,
+        0.0,
+        1.0
+      ],
+      "name": "pCylinder1"
+    },
+    {
+      "mesh": 1,
+      "name": "pCylinder1_standardSurface1_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}

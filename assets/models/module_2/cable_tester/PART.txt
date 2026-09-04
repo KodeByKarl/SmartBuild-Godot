@@ -1,0 +1,4 @@
+﻿PART: Cable Tester
+MODULE: 2
+CATEGORY: Tools
+FILE: model.tscn (procedural via Module2PartFactory)

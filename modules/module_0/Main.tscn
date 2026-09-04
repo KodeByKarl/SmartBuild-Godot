@@ -32,7 +32,42 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 8
 alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="Wrapper"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="ModuleLabel" type="Label" parent="Wrapper/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Module 0 • Computer Systems Servicing Intro"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+text_overrun_behavior = 3
+
+[node name="SearchButton" type="Button" parent="Wrapper/Header"]
+custom_minimum_size = Vector2(72, 32)
+layout_mode = 2
+focus_mode = 0
+text = "Search"
+theme_override_font_sizes/font_size = 12
+
+[node name="HelpButton" type="Button" parent="Wrapper/Header"]
+custom_minimum_size = Vector2(72, 32)
+layout_mode = 2
+focus_mode = 0
+text = "Help"
+theme_override_font_sizes/font_size = 12
+
+[node name="PhaseLabel" type="Label" parent="Wrapper/Header"]
+layout_mode = 2
+text = "Intro"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
 
 [node name="Presentation" type="MarginContainer" parent="Wrapper" unique_id=1917218960]
 layout_mode = 2
@@ -40,40 +75,45 @@ size_flags_vertical = 3
 
 [node name="Content" type="VBoxContainer" parent="Wrapper/Presentation" unique_id=75145440]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 alignment = 1
 
 [node name="Navigation" type="HBoxContainer" parent="Wrapper" unique_id=1093646969]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 size_flags_vertical = 8
+theme_override_constants/separation = 10
 alignment = 1
+
+[node name="LeftGutter" type="Control" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
 
 [node name="Buttons" type="HBoxContainer" parent="Wrapper/Navigation" unique_id=2132771581]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 8
 
 [node name="PreviousButton" type="Button" parent="Wrapper/Navigation/Buttons" unique_id=1054382000]
-custom_minimum_size = Vector2(40, 40)
-custom_maximum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 icon = ExtResource("2_gip54")
 icon_alignment = 1
 expand_icon = true
 
-[node name="Spacer3" type="Container" parent="Wrapper/Navigation/Buttons" unique_id=1018452852]
+[node name="Spacer3" type="Control" parent="Wrapper/Navigation/Buttons" unique_id=1018452852]
 custom_minimum_size = Vector2(12, 0)
-custom_maximum_size = Vector2(12, -1)
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="NextButton" type="Button" parent="Wrapper/Navigation/Buttons" unique_id=456828322]
-custom_minimum_size = Vector2(40, 40)
-custom_maximum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 icon = ExtResource("3_fjfop")
 icon_alignment = 1
 expand_icon = true
 
-[node name="Spacer" type="Container" parent="Wrapper/Navigation" unique_id=634750653]
+[node name="Spacer" type="Control" parent="Wrapper/Navigation" unique_id=634750653]
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -81,14 +121,17 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "1 / 20"
 
-[node name="Spacer2" type="Container" parent="Wrapper/Navigation" unique_id=1265187390]
+[node name="Spacer2" type="Control" parent="Wrapper/Navigation" unique_id=1265187390]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ExitButton" type="Button" parent="Wrapper/Navigation" unique_id=1227360087]
-custom_minimum_size = Vector2(40, 40)
-custom_maximum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 icon = ExtResource("4_d81l5")
 icon_alignment = 1
 expand_icon = true
+
+[node name="RightGutter" type="Control" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2

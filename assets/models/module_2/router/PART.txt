@@ -1,0 +1,5 @@
+﻿PART: Router — Sketchfab Gabriel_515
+MODULE: 2
+CATEGORY: Core Network
+FILE: scene.gltf (preferred) · model.tscn (procedural fallback)
+CREDIT: https://sketchfab.com/3d-models/router-7f1319c36b9b4498b6ce726a22f78637

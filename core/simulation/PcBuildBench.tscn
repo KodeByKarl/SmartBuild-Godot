@@ -1,0 +1,134 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/simulation/pc_build_bench.gd" id="1_bench"]
+
+[sub_resource type="Environment" id="Environment_bench"]
+background_mode = 1
+background_color = Color(0.04, 0.07, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.76, 0.82, 1)
+ambient_light_energy = 1.1
+
+[node name="PcBuildBench" type="Control"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 420)
+script = ExtResource("1_bench")
+
+[node name="Root" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ViewportCard" type="PanelContainer" parent="Root"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.85
+
+[node name="ViewportMargin" type="MarginContainer" parent="Root/ViewportCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Root/ViewportCard/ViewportMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer"]
+own_world_3d = true
+handle_input_locally = true
+size = Vector2i(960, 540)
+render_target_update_mode = 4
+
+[node name="World" type="Node3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World"]
+environment = SubResource("Environment_bench")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(0.866, -0.35, 0.35, 0, 0.707, 0.707, -0.5, -0.61, 0.61, 0, 2, 2)
+light_energy = 1.2
+shadow_enabled = false
+
+[node name="FillLight" type="OmniLight3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.4, 1.2)
+light_energy = 0.7
+omni_range = 8.0
+
+[node name="Camera" type="Camera3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 0.9, 0.435, 0, -0.435, 0.9, 0, 1.4, 2.6)
+current = true
+fov = 42.0
+
+[node name="Bench" type="Node3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World"]
+
+[node name="CaseFrame" type="MeshInstance3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World/Bench"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+
+[node name="Slots" type="Node3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World/Bench"]
+
+[node name="Installed" type="Node3D" parent="Root/ViewportCard/ViewportMargin/SubViewportContainer/SubViewport/World/Bench"]
+
+[node name="HintLabel" type="Label" parent="Root/ViewportCard/ViewportMargin"]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.75, 0.9, 0.98, 0.95)
+theme_override_font_sizes/font_size = 13
+text = "Drag a part from the right onto its bay. Tap a seated part to remove it."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TrayCard" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.58
+
+[node name="TrayMargin" type="MarginContainer" parent="Root/TrayCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TrayVBox" type="VBoxContainer" parent="Root/TrayCard/TrayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TrayTitle" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "PARTS · drag onto the case"
+
+[node name="SelectedLabel" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Drag a part into its bay"
+autowrap_mode = 3
+
+[node name="TrayScroll" type="ScrollContainer" parent="Root/TrayCard/TrayMargin/TrayVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="TrayList" type="VBoxContainer" parent="Root/TrayCard/TrayMargin/TrayVBox/TrayScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

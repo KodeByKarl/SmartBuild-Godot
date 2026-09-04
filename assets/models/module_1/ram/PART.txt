@@ -1,0 +1,2 @@
+PART: RAM — existing repo Sketchfab asset
+FILE: scene.gltf

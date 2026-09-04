@@ -1,0 +1,3 @@
+﻿PART: ATX — 24-pin motherboard power connector
+FILE: model.tscn (procedural)
+Replace with scene.gltf anytime to use a Sketchfab download.

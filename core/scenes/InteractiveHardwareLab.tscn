@@ -1,0 +1,219 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://core/scenes/interactive_hardware_lab.gd" id="1_lab"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lib"]
+bg_color = Color(0.9529412, 0.98039216, 0.99215686, 0.08)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9529412, 0.98039216, 0.99215686, 0.08)
+content_margin_left = 18
+content_margin_top = 18
+content_margin_right = 18
+content_margin_bottom = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_view"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 0.14)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.09019608, 0.6509804, 0.8745098, 0.28)
+content_margin_left = 18
+content_margin_top = 18
+content_margin_right = 18
+content_margin_bottom = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+bg_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 12
+content_margin_top = 6
+content_margin_right = 12
+content_margin_bottom = 6
+
+[node name="InteractiveHardwareLab" type="Control"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 520)
+script = ExtResource("1_lab")
+
+[node name="Split" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="LibraryCard" type="PanelContainer" parent="Split"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.72
+theme_override_styles/panel = SubResource("StyleBoxFlat_lib")
+
+[node name="LibraryMargin" type="MarginContainer" parent="Split/LibraryCard"]
+layout_mode = 2
+
+[node name="LibraryStack" type="VBoxContainer" parent="Split/LibraryCard/LibraryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+text = "Hardware Catalog"
+autowrap_mode = 3
+
+[node name="Subheader" type="Label" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.75)
+text = "Tap a card, then spin and inspect the 3D part."
+autowrap_mode = 3
+
+[node name="Filters" type="HBoxContainer" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Scroll" type="ScrollContainer" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Cards" type="VBoxContainer" parent="Split/LibraryCard/LibraryMargin/LibraryStack/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="ViewerCard" type="PanelContainer" parent="Split"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.45
+theme_override_styles/panel = SubResource("StyleBoxFlat_view")
+
+[node name="ViewerMargin" type="MarginContainer" parent="Split/ViewerCard"]
+layout_mode = 2
+
+[node name="ViewerStack" type="VBoxContainer" parent="Split/ViewerCard/ViewerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleRow" type="HBoxContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+text = "Select a component"
+autowrap_mode = 3
+
+[node name="CategoryBadge" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack/TitleRow"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_badge")
+theme_override_colors/font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+text = "HARDWARE"
+
+[node name="ViewportFrame" type="PanelContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer"]
+own_world_3d = true
+transparent_bg = false
+handle_input_locally = false
+size = Vector2i(720, 420)
+render_target_update_mode = 4
+
+[node name="World" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport"]
+
+[node name="Pivot" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 0.9689124, 0.24740396, 0, -0.24740396, 0.9689124, 0, 0, 0)
+
+[node name="ModelContainer" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World/Pivot"]
+
+[node name="Camera" type="Camera3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 2.2)
+current = true
+
+[node name="KeyLight" type="DirectionalLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(0.8660254, -0.35355338, 0.35355338, 0, 0.70710677, 0.70710677, -0.5, -0.6123724, 0.6123724, 0, 0, 0)
+light_energy = 2.8
+shadow_enabled = false
+
+[node name="FillLight" type="OmniLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.5, 2.2)
+light_color = Color(0.55, 0.8, 1, 1)
+light_energy = 3.6
+omni_range = 14.0
+
+[node name="RimLight" type="OmniLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, 1.2, -1.5)
+light_color = Color(1, 0.95, 0.85, 1)
+light_energy = 2.8
+omni_range = 12.0
+
+[node name="Actions" type="HBoxContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SpinButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
+layout_mode = 2
+text = "Spin 360"
+
+[node name="AutoButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
+layout_mode = 2
+text = "Auto: ON"
+
+[node name="ResetButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
+layout_mode = 2
+text = "Reset View"
+
+[node name="FactLabel" type="RichTextLabel" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_vertical = 0
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "Pick a part to inspect."
+
+[node name="TipLabel" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.7)
+text = "Drag to orbit  •  Scroll to zoom  •  Spin for a closer look"
+autowrap_mode = 3
