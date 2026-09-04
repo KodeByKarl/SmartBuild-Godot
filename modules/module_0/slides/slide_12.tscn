@@ -12,7 +12,7 @@ content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+bg_color = Color(0.04, 0.14, 0.22, 0.96)
 corner_radius_top_left = 32
 corner_radius_top_right = 32
 corner_radius_bottom_right = 32
@@ -146,12 +146,12 @@ corner_radius_bottom_left = 16
 line_spacing = -12.0
 font = ExtResource("4_cn6ji")
 font_size = 60
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+font_color = Color(0.95, 0.98, 0.99, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_13qdw"]
 font = ExtResource("3_xep10")
 font_size = 32
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+font_color = Color(0.95, 0.98, 0.99, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_ulkle"]
 font = ExtResource("3_xep10")

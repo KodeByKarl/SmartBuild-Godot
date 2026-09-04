@@ -16,6 +16,14 @@ config/features=PackedStringArray("4.7", "Mobile")
 boot_splash/show_image=false
 config/icon="res://icon.svg"
 
+[autoload]
+
+EnvConfig="*res://core/services/env_config.gd"
+PerformanceProfile="*res://core/services/performance_profile.gd"
+ResponsiveLayout="*res://core/services/responsive_layout.gd"
+UiMotion="*res://core/services/ui_motion.gd"
+SupabaseService="*res://core/services/supabase_service.gd"
+
 [display]
 
 window/size/viewport_width=1280
@@ -23,6 +31,10 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [physics]
 
@@ -33,3 +45,5 @@ window/handheld/orientation=4
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+lights_and_shadows/directional_shadow/size=2048
+environment/defaults/default_clear_color=Color(0.003921569, 0.09019608, 0.13725491, 1)

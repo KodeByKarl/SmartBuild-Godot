@@ -1,0 +1,139 @@
+[gd_scene format=3 uid="uid://cex3g8cw5v2q4"]
+
+[ext_resource type="Script" path="res://core/scenes/module_shell.gd" id="1_t1n4x"]
+[ext_resource type="Texture2D" uid="uid://doie1s0qqfie2" path="res://assets/icons/arrow_circle_left.svg" id="2_prev"]
+[ext_resource type="Texture2D" uid="uid://ca44mgh64socj" path="res://assets/icons/arrow_circle_right.svg" id="3_next"]
+[ext_resource type="Texture2D" uid="uid://b1nbx0kyhqbnq" path="res://assets/icons/exit_the_app.svg" id="4_exit"]
+
+[node name="ModuleShell" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_t1n4x")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+
+[node name="Wrapper" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="Wrapper"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="ModuleLabel" type="Label" parent="Wrapper/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "MODULE 1 • Installing and Configuring Computer Systems"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+autowrap_mode = 0
+text_overrun_behavior = 3
+
+[node name="PhaseLabel" type="Label" parent="Wrapper/Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Guided Simulation"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
+autowrap_mode = 0
+
+[node name="Presentation" type="MarginContainer" parent="Wrapper"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 6
+
+[node name="PageScroll" type="ScrollContainer" parent="Wrapper/Presentation"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Wrapper/Presentation/PageScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 18
+
+[node name="Navigation" type="HBoxContainer" parent="Wrapper"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="LeftGutter" type="Control" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Wrapper/Navigation"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="PreviousButton" type="Button" parent="Wrapper/Navigation/Buttons"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+icon = ExtResource("2_prev")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Spacer3" type="Control" parent="Wrapper/Navigation/Buttons"]
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="Wrapper/Navigation/Buttons"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+icon = ExtResource("3_next")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Spacer" type="Control" parent="Wrapper/Navigation"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PageCounterLabel" type="Label" parent="Wrapper/Navigation"]
+layout_mode = 2
+text = "1 / 1"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.82)
+
+[node name="Spacer2" type="Control" parent="Wrapper/Navigation"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExitButton" type="Button" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+icon = ExtResource("4_exit")
+icon_alignment = 1
+expand_icon = true
+
+[node name="RightGutter" type="Control" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2

@@ -1,0 +1,4 @@
+﻿PART: RJ45 Crimper
+MODULE: 2
+CATEGORY: Tools
+FILE: model.tscn (procedural via Module2PartFactory)

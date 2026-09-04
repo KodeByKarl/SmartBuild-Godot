@@ -12,7 +12,7 @@ content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
+bg_color = Color(0.04, 0.14, 0.22, 0.96)
 corner_radius_top_left = 32
 corner_radius_top_right = 32
 corner_radius_bottom_right = 32
@@ -21,19 +21,19 @@ corner_radius_bottom_left = 32
 [sub_resource type="LabelSettings" id="LabelSettings_4up83"]
 line_spacing = -20.0
 font = ExtResource("2_vro11")
-font_size = 72
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+font_size = 36
+font_color = Color(0.95, 0.98, 0.99, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wd2pc"]
 font = ExtResource("3_b35k4")
-font_size = 40
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+font_size = 18
+font_color = Color(0.95, 0.98, 0.99, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wig3k"]
 line_spacing = 0.0
 font = ExtResource("4_b8nny")
 font_size = 24
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
+font_color = Color(0.95, 0.98, 0.99, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lw7io"]
 corner_radius_top_left = 20

@@ -1,0 +1,3 @@
+﻿PART: Router — network gateway
+FILE: model.tscn (procedural)
+Replace with scene.gltf anytime to use a Sketchfab download.

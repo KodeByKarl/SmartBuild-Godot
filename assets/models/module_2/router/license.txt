@@ -1,0 +1,8 @@
+Model Information:
+* title:	Router
+* source:	https://sketchfab.com/3d-models/router-7f1319c36b9b4498b6ce726a22f78637
+* author:	Gabriel_515 (https://sketchfab.com/Gabriel_515)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

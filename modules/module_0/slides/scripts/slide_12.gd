@@ -12,28 +12,31 @@ extends Control
 @onready var micro_computer_card: Button = $MarginContainer/PanelContainer/MarginContainer/HBoxContainer/HBoxContainer/VBoxContainer2/Button
 
 var current_model: Node3D = null
-var super_computer_model := preload("res://assets/models/super_computer/scene.gltf")
-var mini_computer_model := preload("res://assets/models/mini_computer/mini_computer.glb")
-var mainframe_model := preload("res://assets/models/main_frame_computer/scene.gltf")
+var _model_cache: Dictionary = {}
 var curr_micro_computer_model := 0
-var micro_computer_models = [
-	preload("res://assets/models/laptop/macbrookpro/macbookpro.tscn"),
-	preload("res://assets/models/ipad/scene.gltf"),
+const SUPER_COMPUTER_PATH := "res://assets/models/shared/super_computer/scene.gltf"
+const MINI_COMPUTER_PATH := "res://assets/models/shared/mini_computer/mini_computer.glb"
+const MAINFRAME_PATH := "res://assets/models/module_3/mainframe/scene.gltf"
+const MICRO_COMPUTER_PATHS: PackedStringArray = [
+	"res://assets/models/module_1/laptop/scene.gltf",
+	"res://assets/models/shared/ipad/scene.gltf",
 ]
 
 func _ready() -> void:
-	#var scm := super_computer_model.instantiate()
-	#card_3d_viewer_model_pivot.add_child(scm)
-	
 	card_3d_viewer.visible = false
 	panel_container.visible = true
-	
+
 	card_3d_viewer.exit_viewer.connect(_on_data_from_card_3d_viewer)
-	
+	if card_3d_viewer.has_method("set_interactive"):
+		card_3d_viewer.set_interactive(true)
+	if card_3d_viewer.has_method("setup"):
+		card_3d_viewer.setup(0.01, 0.2, 0.04)
+
 	super_computer_card.pressed.connect(_on_super_computer_card_pressed)
 	mini_computer_card.pressed.connect(_on_mini_computer_card_pressed)
 	mainframe_card.pressed.connect(_on_mainframe_card_pressed)
 	micro_computer_card.pressed.connect(_on_micro_computer_card_pressed)
+	UiMotion.play_enter(self)
 
 func _on_data_from_card_3d_viewer(value):
 	print("Data from Card 3D Viewer: ", value)
@@ -62,29 +65,49 @@ func _set_3d_model1(card: int):
 	card_3d_viewer.visible = true
 	panel_container.visible = false
 
+func _packed_model(path: String) -> PackedScene:
+	if _model_cache.has(path):
+		return _model_cache[path] as PackedScene
+	var packed := load(path) as PackedScene
+	if packed != null:
+		_model_cache[path] = packed
+	else:
+		push_error("slide_12 failed to load model: %s" % path)
+	return packed
+
+
 func _set_3d_model(card: int):
+	var packed: PackedScene = null
 	match card:
 		0:
 			print("Super Computer")
-			current_model = super_computer_model.instantiate()
+			packed = _packed_model(SUPER_COMPUTER_PATH)
 			card_3d_viewer_node_3d.setup(0.001, 0.2, 0.2)
 		1:
 			print("Mini Computer")
-			current_model = mini_computer_model.instantiate()
+			packed = _packed_model(MINI_COMPUTER_PATH)
 			card_3d_viewer_node_3d.setup(0.001, 0.2, 0.2)
 		2:
 			print("Mainframe")
-			current_model = mainframe_model.instantiate()
+			packed = _packed_model(MAINFRAME_PATH)
 			card_3d_viewer_node_3d.setup(0.0005, 0.01, 0.01)
 		3:
 			print("Micro Computer")
-			current_model = micro_computer_models[curr_micro_computer_model].instantiate()
+			packed = _packed_model(MICRO_COMPUTER_PATHS[curr_micro_computer_model])
 			card_3d_viewer_node_3d.setup(0.0005, 0.01, 0.01)
 			curr_micro_computer_model += 1
-			if micro_computer_models.size() == curr_micro_computer_model:
+			if MICRO_COMPUTER_PATHS.size() == curr_micro_computer_model:
 				curr_micro_computer_model = 0
-	
+
+	if packed == null:
+		return
+	current_model = packed.instantiate()
 	card_3d_viewer_model_pivot.add_child(current_model)
 	card_3d_viewer_node_3d.setting_model()
+	if card_3d_viewer.has_method("set_interactive"):
+		card_3d_viewer.set_interactive(true)
+	if card_3d_viewer.has_method("set_auto_rotate"):
+		card_3d_viewer.set_auto_rotate(true)
 	card_3d_viewer.visible = true
 	panel_container.visible = false
+	UiMotion.play_enter(card_3d_viewer)

@@ -1,0 +1,4 @@
+﻿PART: RJ45 Connector
+MODULE: 2
+CATEGORY: Cabling
+FILE: model.tscn (procedural via Module2PartFactory)

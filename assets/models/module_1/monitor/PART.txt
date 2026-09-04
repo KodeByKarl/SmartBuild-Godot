@@ -1,0 +1,2 @@
+PART: Monitor — Sketchfab Charckes (PSX Monitor)
+FILE: scene.gltf

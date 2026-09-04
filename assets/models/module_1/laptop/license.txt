@@ -1,0 +1,8 @@
+Model Information:
+* title:	Laptop
+* source:	https://sketchfab.com/3d-models/laptop-603062a9eae348b99c8f34533c201964
+* author:	Gonsaku (https://sketchfab.com/Gonsaku)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

@@ -1,39 +1,8 @@
-[gd_scene format=3 uid="uid://dy3u1aogvmafj"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Texture2D" uid="uid://wi0n2rxrwcol" path="res://assets/shapes/pentagon.png" id="1_66ivb"]
-[ext_resource type="FontFile" uid="uid://y5mhdyid5s7r" path="res://assets/fonts/gscode_extrabold.ttf" id="2_ludmr"]
-[ext_resource type="FontFile" uid="uid://0bu1yjprpme5" path="res://assets/fonts/gsflex_medium.ttf" id="3_omrjw"]
-[ext_resource type="FontFile" uid="uid://bwuxap1daom7k" path="res://assets/fonts/gsflex_regular.ttf" id="4_58gm8"]
+[ext_resource type="Script" path="res://modules/module_0/slides/lesson_slide.gd" id="1_slide"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gj70g"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
-corner_radius_top_left = 32
-corner_radius_top_right = 32
-corner_radius_bottom_right = 32
-corner_radius_bottom_left = 32
-
-[sub_resource type="LabelSettings" id="LabelSettings_4up83"]
-line_spacing = -20.0
-font = ExtResource("2_ludmr")
-font_size = 72
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_wd2pc"]
-font = ExtResource("3_omrjw")
-font_size = 40
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_wig3k"]
-line_spacing = 0.0
-font = ExtResource("4_58gm8")
-font_size = 24
-font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
-
-[node name="Slide15" type="Control" unique_id=1019984647]
+[node name="Slide15" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,104 +11,5 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=368013947]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.003921569, 0.09019608, 0.13725491, 1)
-
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1686970633]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
-
-[node name="PanelContainer" type="Panel" parent="MarginContainer" unique_id=1640257304]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_gj70g")
-
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/PanelContainer" unique_id=241702282]
-visible = false
-layout_mode = 0
-offset_right = 315.0
-offset_bottom = 306.0
-texture = ExtResource("1_66ivb")
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=468044284]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 40
-theme_override_constants/margin_top = 40
-theme_override_constants/margin_right = 40
-theme_override_constants/margin_bottom = 40
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=276905436]
-layout_mode = 2
-theme_override_constants/separation = 48
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=243136131]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 0
-alignment = 1
-
-[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=1452698075]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-text = "THE SYSTEM UNIT"
-label_settings = SubResource("LabelSettings_4up83")
-autowrap_mode = 3
-
-[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=407835779]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-text = "Inside the Heart of a Computer"
-label_settings = SubResource("LabelSettings_wd2pc")
-autowrap_mode = 3
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=812161355]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 40
-alignment = 1
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=744692392]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 20
-
-[node name="Label2" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=474234824]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-text = "The system unit is the main enclosure that houses that critical internal components of a computer. It provides the physical structure and electrical connections needed for all parts to work together."
-label_settings = SubResource("LabelSettings_wig3k")
-autowrap_mode = 3
-
-[node name="Label3" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=676287375]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-text = "Key internal components: Power Supply Unit (PSU), Motherboard, CPU, RAM, Cooling System (fans & heat sinks), Expansion Cards, and Storage Devices (SSD/HDD)."
-label_settings = SubResource("LabelSettings_wig3k")
-autowrap_mode = 3
-
-[node name="BoxContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1581144610]
-layout_mode = 2
-size_flags_horizontal = 3
+script = ExtResource("1_slide")
+slide_id = 15

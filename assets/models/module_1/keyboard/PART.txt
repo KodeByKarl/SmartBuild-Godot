@@ -1,0 +1,2 @@
+PART: Keyboard — Sketchfab Flexryhe (Mechanical Keyboard)
+FILE: scene.gltf

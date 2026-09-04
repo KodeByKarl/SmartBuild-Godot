@@ -1,0 +1,2 @@
+PART: Laptop — Sketchfab Gonsaku
+FILE: scene.gltf

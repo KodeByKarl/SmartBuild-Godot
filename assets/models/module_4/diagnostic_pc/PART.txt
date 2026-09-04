@@ -1,0 +1,2 @@
+PART: DiagnosticPC
+FILE: model.tscn (procedural)

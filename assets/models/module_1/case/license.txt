@@ -1,0 +1,8 @@
+Model Information:
+* title:	PC [model]
+* source:	https://sketchfab.com/3d-models/pc-model-ef80b29ad9f94dfc9af23db81e09de2b
+* author:	Meilov (https://sketchfab.com/meilov3D)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

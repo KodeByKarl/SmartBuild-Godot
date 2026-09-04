@@ -1,0 +1,2 @@
+PART: Screwdriver — Sketchfab lonesomeducky (Flathead)
+FILE: scene.gltf

@@ -1,0 +1,5 @@
+﻿PART: Modem — Sketchfab sinemmbagcioglu (MODEM)
+MODULE: 2
+CATEGORY: WAN Edge
+FILE: scene.gltf (preferred) · model.tscn (procedural fallback)
+CREDIT: https://sketchfab.com/3d-models/modem-a91492359e664c3f8010a041b2d05de8 (CC-BY-4.0)

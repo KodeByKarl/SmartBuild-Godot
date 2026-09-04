@@ -1,0 +1,8 @@
+Model Information:
+* title:	Simple Virus USB Flash
+* source:	https://sketchfab.com/3d-models/simple-virus-usb-flash-fcbe5f15b47446de92e9f7053818cae5
+* author:	trashbinkr (https://sketchfab.com/ChristopherKR)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

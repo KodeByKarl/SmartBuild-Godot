@@ -1,0 +1,8 @@
+Model Information:
+* title:	Intel 486DX 50mhz CPU
+* source:	https://sketchfab.com/3d-models/intel-486dx-50mhz-cpu-bd937cf82d0e4da18d9a73759b2995fa
+* author:	AquaEquinox (https://sketchfab.com/ohno9119)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

@@ -1,0 +1,2 @@
+PART: Motherboard — Sketchfab tommy.grzembke
+FILE: scene.gltf
