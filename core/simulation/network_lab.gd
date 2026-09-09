@@ -110,6 +110,7 @@ var _left_col: VBoxContainer = null
 var _right_col: VBoxContainer = null
 var _reset_links_btn: Button = null
 var _reset_layout_btn: Button = null
+var _rules_label: RichTextLabel = null
 var _node_size: Vector2 = NODE_SIZE
 var _icon_size: Vector2 = ICON_SIZE
 var _drag_id: String = ""
@@ -173,6 +174,7 @@ func setup(preset: Array = [], hints: bool = true) -> void:
 	elif _devices.is_empty():
 		_spawn_default_topology()
 	_refresh_hints()
+	_refresh_rules_guide()
 	call_deferred("_relayout_devices")
 
 
@@ -180,6 +182,7 @@ func set_guided_hint(target: String, destination: String) -> void:
 	_hint_target = target
 	_hint_destination = destination
 	_refresh_hints()
+	_refresh_rules_guide()
 
 
 func flash_incorrect() -> void:
@@ -256,7 +259,7 @@ func _build_ui() -> void:
 
 	var tools_lbl := Label.new()
 	tools_lbl.text = "TOOLS"
-	tools_lbl.add_theme_font_size_override("font_size", 10)
+	tools_lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	tools_lbl.add_theme_color_override("font_color", Color(0.5, 0.75, 0.9, 0.85))
 	toolbar_row.add_child(tools_lbl)
 
@@ -271,7 +274,7 @@ func _build_ui() -> void:
 	_cable_picker.focus_mode = Control.FOCUS_NONE
 	_cable_picker.custom_minimum_size = Vector2(0, 30)
 	_cable_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_cable_picker.add_theme_font_size_override("font_size", 12)
+	_cable_picker.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	var cable_ids: Array = ["straight", "crossover", "console"]
 	for index in cable_ids.size():
 		var cable_id: String = str(cable_ids[index])
@@ -315,7 +318,7 @@ func _build_ui() -> void:
 
 	var palette_lbl := Label.new()
 	palette_lbl.text = "ADD DEVICE"
-	palette_lbl.add_theme_font_size_override("font_size", 10)
+	palette_lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	palette_lbl.add_theme_color_override("font_color", Color(0.45, 0.85, 1.0, 0.9))
 	_palette_row.add_child(palette_lbl)
 
@@ -323,11 +326,21 @@ func _build_ui() -> void:
 		var add_btn := Button.new()
 		add_btn.text = "+ %s" % _palette_label(device_type)
 		add_btn.focus_mode = Control.FOCUS_NONE
-		add_btn.add_theme_font_size_override("font_size", 11)
+		add_btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 		add_btn.set_meta("device_type", device_type)
 		_style_btn(add_btn, false)
 		add_btn.pressed.connect(_on_palette_add.bind(device_type))
 		_palette_row.add_child(add_btn)
+
+	_rules_label = RichTextLabel.new()
+	_rules_label.bbcode_enabled = true
+	_rules_label.fit_content = true
+	_rules_label.scroll_active = false
+	_rules_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_rules_label.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
+	_rules_label.add_theme_color_override("default_color", Color(0.8, 0.9, 0.98))
+	left.add_child(_rules_label)
+	_refresh_rules_guide()
 
 	left.add_child(_status_row())
 
@@ -380,7 +393,7 @@ func _build_ui() -> void:
 	cli_panel.add_child(cli_col)
 	var cli_hdr := Label.new()
 	cli_hdr.text = "CLI OUTPUT"
-	cli_hdr.add_theme_font_size_override("font_size", 10)
+	cli_hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	cli_hdr.add_theme_color_override("font_color", Color(0.45, 0.85, 0.6, 0.9))
 	cli_col.add_child(cli_hdr)
 
@@ -390,7 +403,7 @@ func _build_ui() -> void:
 	_cli_out.scroll_active = true
 	_cli_out.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_cli_out.custom_minimum_size = Vector2(0, 56)
-	_cli_out.add_theme_font_size_override("normal_font_size", 12)
+	_cli_out.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(12))
 	_cli_out.add_theme_color_override("default_color", Color(0.7, 0.95, 0.75))
 	_cli_out.text = "[b]Ready.[/b] Pick a cable type, then click two devices. [color=#7d7]Green[/color] link lights mean the cable is right; [color=#f77]red[/color] means it cannot pass traffic."
 	cli_col.add_child(_cli_out)
@@ -435,7 +448,7 @@ func _build_ui() -> void:
 	var insp_hint := Label.new()
 	insp_hint.text = "Select a PC to edit addressing."
 	insp_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	insp_hint.add_theme_font_size_override("font_size", 11)
+	insp_hint.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	insp_hint.add_theme_color_override("font_color", Color(0.65, 0.8, 0.9, 0.85))
 	insp_col.add_child(insp_hint)
 
@@ -472,7 +485,7 @@ func _build_ui() -> void:
 	var flow := Label.new()
 	flow.text = "Flow\n• Drag icons to place\n• Cable topology\n• Apply PC1 IP\n• Ping gateway"
 	flow.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	flow.add_theme_font_size_override("font_size", 11)
+	flow.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	flow.add_theme_color_override("font_color", Color(0.55, 0.78, 0.9, 0.85))
 	insp_col.add_child(flow)
 
@@ -495,7 +508,7 @@ func _status_row() -> PanelContainer:
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.add_theme_font_size_override("font_size", 11)
+	_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	_status.add_theme_color_override("font_color", Color(0.78, 0.9, 0.98, 0.92))
 	wrap.add_child(_status)
 	return wrap
@@ -701,7 +714,7 @@ func _add_device(id: String) -> void:
 	var title := Label.new()
 	title.name = "Title"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	title.add_theme_color_override("font_color", Color(0.98, 0.99, 1.0))
 	title.text = _device_label(id)
 	col.add_child(title)
@@ -709,7 +722,7 @@ func _add_device(id: String) -> void:
 	var sub := Label.new()
 	sub.name = "Sub"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_size_override("font_size", 10)
+	sub.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	sub.add_theme_color_override("font_color", Color(0.75, 0.88, 0.98, 0.9))
 	sub.text = str(DEVICE_SUB.get(_device_kind(id), DEVICE_SUB.get(id, "")))
 	col.add_child(sub)
@@ -1000,6 +1013,26 @@ func _required_cable(a: String, b: String) -> String:
 	return "straight" if _wiring_class(a) != _wiring_class(b) else "crossover"
 
 
+func _refresh_rules_guide() -> void:
+	if _rules_label == null:
+		return
+	if _topology_mode:
+		_rules_label.text = (
+			"[b]Rules & guide[/b]  ·  Add switch, file server, and PC from ADD DEVICE. "
+			+ "Unlike classes (PC↔switch, server↔switch) take [b]straight-through[/b]. "
+			+ "Address server [code]192.168.10.10[/code], PC1 [code]192.168.10.20[/code] / GW [code]192.168.10.10[/code], then ping the server. "
+			+ "A red link means the wrong cable — change type and recable."
+		)
+	else:
+		_rules_label.text = (
+			"[b]Rules & guide[/b]  ·  Cable = pick type, then click two devices. "
+			+ "[b]Straight-through[/b] joins unlike classes (PC↔switch, router↔switch, modem↔router). "
+			+ "[b]Crossover[/b] joins like classes (PC↔PC). Console is management only. "
+			+ "PC1 addressing: [code]192.168.1.10[/code] / [code]255.255.255.0[/code] / GW [code]192.168.1.1[/code]. "
+			+ "Ping only succeeds on a green path to that gateway."
+		)
+
+
 ## Console cables are management-only, and only from a PC to a router or switch.
 func _console_allowed(a: String, b: String) -> bool:
 	var pair: Array = [a, b]
@@ -1017,13 +1050,13 @@ func _create_link(a: String, b: String, cable: String) -> void:
 	var label_b: String = _device_label(b)
 	var up: bool = false
 	var reason: String = ""
+	var required: String = _required_cable(a, b)
 	if cable == "console":
 		if _console_allowed(a, b):
 			reason = "Console link to %s — management only, carries no data." % label_b
 		else:
 			reason = "Console cable only runs from a PC to a router or switch."
 	else:
-		var required: String = _required_cable(a, b)
 		up = cable == required
 		if not up:
 			if required == "crossover":
@@ -1054,6 +1087,8 @@ func _create_link(a: String, b: String, cable: String) -> void:
 	else:
 		_cli_append("[color=#f77]%s[/color]" % reason)
 		_refresh_status(reason)
+		flash_incorrect()
+		action_submitted.emit(SimulationAction.new("connect", "wrong_cable", required if cable != "console" else "console"))
 
 
 func _reset_links() -> void:
@@ -1069,16 +1104,71 @@ func _apply_ip() -> void:
 	if _selected_id == "" or not _is_addressable(_selected_id):
 		_refresh_status("Select a PC or server before applying IP settings.")
 		return
+	var ip: String = _config_ip.text.strip_edges()
+	var mask: String = _config_mask.text.strip_edges()
+	var gw: String = _config_gw.text.strip_edges()
+	var dns: String = _config_dns.text.strip_edges()
+	if not _looks_like_ipv4(ip) or not _looks_like_ipv4(mask):
+		_refresh_status("Rule: IP and mask must be dotted decimal (example 192.168.1.10 / 255.255.255.0).")
+		flash_incorrect()
+		action_submitted.emit(SimulationAction.new("configure", "invalid", "addressing"))
+		return
+	var expected: Dictionary = _expected_address(_selected_id)
+	if not expected.is_empty():
+		if ip != str(expected.get("ip", ip)):
+			_refresh_status("Rule: %s must use IP %s on this lab." % [_device_label(_selected_id), expected["ip"]])
+			flash_incorrect()
+			action_submitted.emit(SimulationAction.new("configure", "wrong_ip", "addressing"))
+			return
+		if mask != str(expected.get("mask", mask)):
+			_refresh_status("Rule: subnet mask must be %s." % expected["mask"])
+			flash_incorrect()
+			action_submitted.emit(SimulationAction.new("configure", "wrong_mask", "addressing"))
+			return
+		var exp_gw: String = str(expected.get("gateway", ""))
+		if exp_gw != "" and gw != exp_gw:
+			_refresh_status("Rule: default gateway for %s is %s." % [_device_label(_selected_id), exp_gw])
+			flash_incorrect()
+			action_submitted.emit(SimulationAction.new("configure", "wrong_gw", "addressing"))
+			return
 	var dev: Dictionary = _devices[_selected_id]
-	dev["ip"] = _config_ip.text.strip_edges()
-	dev["mask"] = _config_mask.text.strip_edges()
-	dev["gateway"] = _config_gw.text.strip_edges()
-	dev["dns"] = _config_dns.text.strip_edges()
+	dev["ip"] = ip
+	dev["mask"] = mask
+	dev["gateway"] = gw
+	dev["dns"] = dns
 	var action := SimulationAction.new("configure", _selected_id, "addressing")
 	action_submitted.emit(action)
 	_cli_append("Configured %s → IP %s  GW %s" % [_device_label(_selected_id), dev["ip"], dev["gateway"]])
 	_refresh_status("Addressing applied on %s." % _device_label(_selected_id))
 	_style_device(_selected_id)
+
+
+func _looks_like_ipv4(text: String) -> bool:
+	var parts: PackedStringArray = text.split(".")
+	if parts.size() != 4:
+		return false
+	for part in parts:
+		if not part.is_valid_int():
+			return false
+		var n: int = int(part)
+		if n < 0 or n > 255:
+			return false
+	return true
+
+
+func _expected_address(id: String) -> Dictionary:
+	var kind := _device_kind(id)
+	if kind == "pc":
+		if _topology_mode:
+			if id == "pc1":
+				return {"ip": "192.168.10.20", "mask": "255.255.255.0", "gateway": "192.168.10.10"}
+			return {"ip": "192.168.10.21", "mask": "255.255.255.0", "gateway": "192.168.10.10"}
+		if id == "pc1":
+			return {"ip": "192.168.1.10", "mask": "255.255.255.0", "gateway": "192.168.1.1"}
+		return {"ip": "192.168.1.11", "mask": "255.255.255.0", "gateway": "192.168.1.1"}
+	if kind == "server":
+		return {"ip": "192.168.10.10", "mask": "255.255.255.0", "gateway": ""}
+	return {}
 
 
 func _is_addressable(id: String) -> bool:
@@ -1097,14 +1187,16 @@ func _run_ping() -> void:
 		return
 	var dest_id := _resolve_ip_device(dest_ip)
 	var reachable := _can_reach(_selected_id, dest_ip)
-	var action := SimulationAction.new("ping", _selected_id, dest_ip)
 	if reachable:
 		_cli_append("Reply from %s: bytes=32 time<1ms TTL=64" % dest_ip)
 		var packet_dest := dest_id if dest_id != "" else _selected_id
 		_spawn_ping_packets(_selected_id, packet_dest)
+		action_submitted.emit(SimulationAction.new("ping", _selected_id, dest_ip))
 	else:
 		_cli_append("Request timed out.%s" % _failure_hint())
-	action_submitted.emit(action)
+		_refresh_status("Ping failed.%s" % _failure_hint())
+		flash_incorrect()
+		action_submitted.emit(SimulationAction.new("ping", "timeout", dest_ip))
 
 
 ## A red link is the most likely reason a ping died, so name it before the
@@ -1373,7 +1465,7 @@ func _labeled_field(caption: String, edit: LineEdit) -> VBoxContainer:
 	wrap.add_theme_constant_override("separation", 2)
 	var lbl := Label.new()
 	lbl.text = caption
-	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	lbl.add_theme_color_override("font_color", Color(0.6, 0.78, 0.9, 0.9))
 	wrap.add_child(lbl)
 	wrap.add_child(edit)
@@ -1391,7 +1483,7 @@ func _divider() -> ColorRect:
 func _section_label(text: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	lbl.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	return lbl
 

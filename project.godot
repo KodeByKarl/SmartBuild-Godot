@@ -20,7 +20,9 @@ config/icon="res://icon.svg"
 
 EnvConfig="*res://core/services/env_config.gd"
 PerformanceProfile="*res://core/services/performance_profile.gd"
+ResourceWarmup="*res://core/services/resource_warmup.gd"
 ResponsiveLayout="*res://core/services/responsive_layout.gd"
+TouchScrollService="*res://core/services/touch_scroll_service.gd"
 UiMotion="*res://core/services/ui_motion.gd"
 SupabaseService="*res://core/services/supabase_service.gd"
 
@@ -39,6 +41,15 @@ pointing/emulate_touch_from_mouse=true
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[importer_defaults]
+
+texture={
+"compress/high_quality": false,
+"compress/lossy_quality": 0.7,
+"mipmaps/generate": true,
+"process/size_limit": 1024
+}
 
 [rendering]
 

@@ -12,10 +12,22 @@ const MUTED := Color(0.72, 0.86, 0.95, 0.9)
 const CARD_DARK := Color(0.03, 0.12, 0.2, 0.95)
 const CARD_CYAN := Color(0.07, 0.42, 0.58, 0.95)
 
+const RESPONSIVE := preload("res://core/services/responsive_layout.gd")
+
 const FONT_TITLE := "res://assets/fonts/gscode_extrabold.ttf"
 const FONT_SUB := "res://assets/fonts/gsflex_medium.ttf"
 const FONT_BODY := "res://assets/fonts/gsflex_regular.ttf"
 const FONT_CARD := "res://assets/fonts/gsflex_bold.ttf"
+
+
+## Mirrors ResponsiveLayout.readable_font. Slide settings are built from static
+## context, so the shared bounds are read off the script instead of the autoload.
+static func readable(size: int) -> int:
+	return clampi(
+		int(round(float(size) * RESPONSIVE.READABLE_FONT_BOOST)),
+		RESPONSIVE.READABLE_FONT_MIN,
+		RESPONSIVE.READABLE_FONT_MAX
+	)
 
 
 static func load_font(path: String) -> Font:
@@ -53,7 +65,7 @@ static func card_style(accent: bool = false) -> StyleBoxFlat:
 static func title_settings(size: int = 36) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font = load_font(FONT_TITLE)
-	ls.font_size = size
+	ls.font_size = readable(size)
 	ls.font_color = WHITE
 	ls.line_spacing = -4
 	return ls
@@ -62,7 +74,7 @@ static func title_settings(size: int = 36) -> LabelSettings:
 static func subtitle_settings(size: int = 18) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font = load_font(FONT_SUB)
-	ls.font_size = size
+	ls.font_size = readable(size)
 	ls.font_color = CYAN
 	return ls
 
@@ -70,7 +82,7 @@ static func subtitle_settings(size: int = 18) -> LabelSettings:
 static func body_settings(size: int = 16) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font = load_font(FONT_BODY)
-	ls.font_size = size
+	ls.font_size = readable(size)
 	ls.font_color = MUTED
 	return ls
 
@@ -78,7 +90,7 @@ static func body_settings(size: int = 16) -> LabelSettings:
 static func card_title_settings(size: int = 16) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font = load_font(FONT_CARD)
-	ls.font_size = size
+	ls.font_size = readable(size)
 	ls.font_color = WHITE
 	return ls
 
@@ -86,6 +98,6 @@ static func card_title_settings(size: int = 16) -> LabelSettings:
 static func card_body_settings(size: int = 13) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font = load_font(FONT_BODY)
-	ls.font_size = size
+	ls.font_size = readable(size)
 	ls.font_color = Color(0.82, 0.92, 0.98, 0.92)
 	return ls

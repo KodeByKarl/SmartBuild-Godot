@@ -45,11 +45,23 @@ content_margin_top = 6
 content_margin_right = 12
 content_margin_bottom = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
+bg_color = Color(0.02, 0.05, 0.08, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.45, 0.6, 0.45)
+
 [node name="InteractiveHardwareLab" type="Control"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 520)
+custom_minimum_size = Vector2(0, 440)
 script = ExtResource("1_lab")
 
 [node name="Split" type="HBoxContainer" parent="."]
@@ -79,16 +91,16 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="Label" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 27
 theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
 text = "Hardware Catalog"
 autowrap_mode = 3
 
 [node name="Subheader" type="Label" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.75)
-text = "Tap a card, then spin and inspect the 3D part."
+text = "Tap a card to inspect a static image of the part."
 autowrap_mode = 3
 
 [node name="Filters" type="HBoxContainer" parent="Split/LibraryCard/LibraryMargin/LibraryStack"]
@@ -123,84 +135,47 @@ theme_override_constants/separation = 12
 
 [node name="TitleRow" type="HBoxContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack/TitleRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 29
 theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
-text = "Select a component"
+text = "Pick a part"
 autowrap_mode = 3
 
 [node name="CategoryBadge" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack/TitleRow"]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_badge")
+theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.003921569, 0.09019608, 0.13725491, 1)
-text = "HARDWARE"
+text = "IMAGE LAB"
 
-[node name="ViewportFrame" type="PanelContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
-custom_minimum_size = Vector2(0, 240)
+[node name="PreviewFrame" type="PanelContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
+[node name="PreviewInner" type="VBoxContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack/PreviewFrame"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PreviewImage" type="TextureRect" parent="Split/ViewerCard/ViewerMargin/ViewerStack/PreviewFrame/PreviewInner"]
+custom_minimum_size = Vector2(0, 180)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame"]
+[node name="PreviewCaption" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack/PreviewFrame/PreviewInner"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-stretch = true
-
-[node name="SubViewport" type="SubViewport" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer"]
-own_world_3d = true
-transparent_bg = false
-handle_input_locally = false
-size = Vector2i(720, 420)
-render_target_update_mode = 4
-
-[node name="World" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport"]
-
-[node name="Pivot" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
-transform = Transform3D(1, 0, 0, 0, 0.9689124, 0.24740396, 0, -0.24740396, 0.9689124, 0, 0, 0)
-
-[node name="ModelContainer" type="Node3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World/Pivot"]
-
-[node name="Camera" type="Camera3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 2.2)
-current = true
-
-[node name="KeyLight" type="DirectionalLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
-transform = Transform3D(0.8660254, -0.35355338, 0.35355338, 0, 0.70710677, 0.70710677, -0.5, -0.6123724, 0.6123724, 0, 0, 0)
-light_energy = 2.8
-shadow_enabled = false
-
-[node name="FillLight" type="OmniLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.5, 2.2)
-light_color = Color(0.55, 0.8, 1, 1)
-light_energy = 3.6
-omni_range = 14.0
-
-[node name="RimLight" type="OmniLight3D" parent="Split/ViewerCard/ViewerMargin/ViewerStack/ViewportFrame/SubViewportContainer/SubViewport/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, 1.2, -1.5)
-light_color = Color(1, 0.95, 0.85, 1)
-light_energy = 2.8
-omni_range = 12.0
-
-[node name="Actions" type="HBoxContainer" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="SpinButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
-layout_mode = 2
-text = "Spin 360"
-
-[node name="AutoButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
-layout_mode = 2
-text = "Auto: ON"
-
-[node name="ResetButton" type="Button" parent="Split/ViewerCard/ViewerMargin/ViewerStack/Actions"]
-layout_mode = 2
-text = "Reset View"
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.85)
+text = "Select a part from the list"
+horizontal_alignment = 1
 
 [node name="FactLabel" type="RichTextLabel" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
 custom_minimum_size = Vector2(0, 72)
@@ -213,7 +188,7 @@ text = "Pick a part to inspect."
 
 [node name="TipLabel" type="Label" parent="Split/ViewerCard/ViewerMargin/ViewerStack"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 17
 theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.7)
-text = "Drag to orbit  •  Scroll to zoom  •  Spin for a closer look"
+text = "Static image preview  •  Tap Next to continue"
 autowrap_mode = 3

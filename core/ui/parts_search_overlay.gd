@@ -61,23 +61,24 @@ func _build_ui(initial_query: String) -> void:
 
 	var header := HBoxContainer.new()
 	left.add_child(header)
-	var title := Label.new()
-	title.text = "Parts Encyclopedia"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 20)
-	header.add_child(title)
 	var close_btn := Button.new()
 	close_btn.text = "Close"
 	close_btn.focus_mode = Control.FOCUS_NONE
 	close_btn.pressed.connect(_close)
+	_style_close_button(close_btn)
 	header.add_child(close_btn)
+	var title := Label.new()
+	title.text = "Parts Encyclopedia"
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(20))
+	header.add_child(title)
 
 	var scope := Label.new()
 	if _module_id > 0:
 		scope.text = "Showing parts for Module %d" % _module_id
 	else:
 		scope.text = "Intro · full CSS Parts Encyclopedia"
-	scope.add_theme_font_size_override("font_size", 11)
+	scope.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	scope.add_theme_color_override("font_color", Color(0.65, 0.82, 0.92, 0.85))
 	left.add_child(scope)
 
@@ -134,7 +135,7 @@ func _refresh_list() -> void:
 		row.text = "%s  ·  %s" % [str(part.get("title", "?")), str(part.get("category", ""))]
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.focus_mode = Control.FOCUS_NONE
-		row.add_theme_font_size_override("font_size", 12)
+		row.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 		row.pressed.connect(_show_part.bind(part))
 		_list.add_child(row)
 	if _list.get_child_count() == 0:
@@ -159,6 +160,29 @@ func _show_part(part: Dictionary) -> void:
 			str(part.get("technician_tips", "")),
 		]
 	)
+
+
+func _style_close_button(btn: Button) -> void:
+	var cyan := Color(0.09, 0.65, 0.87, 1)
+	var white := Color(0.95, 0.98, 0.99, 1)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.04, 0.18, 0.28, 0.95)
+	normal.border_color = Color(0.35, 0.82, 0.95, 0.45)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(12)
+	normal.content_margin_left = 14
+	normal.content_margin_right = 14
+	normal.content_margin_top = 8
+	normal.content_margin_bottom = 8
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.08, 0.32, 0.45, 0.98)
+	hover.border_color = cyan
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", hover)
+	btn.add_theme_color_override("font_color", cyan)
+	btn.add_theme_color_override("font_hover_color", white)
+	btn.custom_minimum_size = Vector2(72, 36)
 
 
 func _close() -> void:

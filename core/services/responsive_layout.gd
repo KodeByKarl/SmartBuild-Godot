@@ -5,6 +5,13 @@ extends Node
 const PHONE_MAX_WIDTH := 720.0
 const COMPACT_MAX_WIDTH := 960.0
 
+## Single knob for lesson/simulation text size. Page copy and chips were authored
+## at 10-12px, which testers could not read on a phone, so every authored size is
+## routed through readable_font() instead of being retuned one call site at a time.
+const READABLE_FONT_BOOST := 1.22
+const READABLE_FONT_MIN := 15
+const READABLE_FONT_MAX := 44
+
 
 func viewport_size() -> Vector2:
 	return get_viewport().get_visible_rect().size
@@ -37,6 +44,10 @@ func content_scale() -> float:
 
 func scaled_font(base: int) -> int:
 	return maxi(int(round(float(base) * content_scale())), 11)
+
+
+func readable_font(base: int) -> int:
+	return clampi(int(round(float(base) * READABLE_FONT_BOOST)), READABLE_FONT_MIN, READABLE_FONT_MAX)
 
 
 func fit_full_rect(control: Control) -> void:

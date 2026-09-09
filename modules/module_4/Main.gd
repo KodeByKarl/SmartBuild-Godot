@@ -147,20 +147,20 @@ func _build_host_dock() -> void:
 
 	var title := Label.new()
 	title.text = "Module 4 · Real PC Mode"
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(22))
 	title.add_theme_color_override("font_color", Color(0.45, 0.85, 1.0))
 	col.add_child(title)
 
 	var blurb := Label.new()
 	blurb.text = "The service PC opens in a separate window so the Windows desktop simulation feels like a real workstation."
 	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	blurb.add_theme_font_size_override("font_size", 13)
+	blurb.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	blurb.add_theme_color_override("font_color", Color(0.78, 0.9, 0.98))
 	col.add_child(blurb)
 
 	_dock_status = Label.new()
 	_dock_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_dock_status.add_theme_font_size_override("font_size", 12)
+	_dock_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_dock_status.add_theme_color_override("font_color", Color(0.7, 0.88, 0.78))
 	col.add_child(_dock_status)
 
@@ -175,7 +175,7 @@ func _build_host_dock() -> void:
 	var hint := Label.new()
 	hint.text = "Use Exit inside the Real PC window (module nav) to leave the simulation."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.add_theme_font_size_override("font_size", 11)
+	hint.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	hint.add_theme_color_override("font_color", Color(0.55, 0.72, 0.85))
 	col.add_child(hint)
 
@@ -207,4 +207,4 @@ func _style_primary(btn: Button) -> void:
 	btn.add_theme_stylebox_override("hover", style)
 	btn.add_theme_stylebox_override("pressed", style)
 	btn.add_theme_color_override("font_color", Color(0.02, 0.08, 0.12))
-	btn.add_theme_font_size_override("font_size", 14)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))

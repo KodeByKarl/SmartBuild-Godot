@@ -74,7 +74,7 @@ func _ready() -> void:
 	_label = Label.new()
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_label.add_theme_font_size_override("font_size", 14)
+	_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))
 	_label.add_theme_color_override("font_color", WHITE)
 	_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

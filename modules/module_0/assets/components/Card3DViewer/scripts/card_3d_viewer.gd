@@ -1,5 +1,8 @@
 extends Control
 
+## Phone demo: skip live 3D SubViewport work (Module 0 intros).
+const FREEZE_3D := true
+
 @onready var node_3d: Node3D = $SubViewportContainer/SubViewport/Node3D
 @onready var button: Button = $Button
 @onready var viewport_container: SubViewportContainer = $SubViewportContainer
@@ -7,12 +10,15 @@ extends Control
 
 signal exit_viewer(value: bool)
 
-var _interactive := true
+var _interactive := not FREEZE_3D
 var _hint_enabled := true
 var _hint_label: Label = null
 
 
 func setup(rotation_speed: float, zoom_speed: float, pan_speed: float) -> void:
+	if FREEZE_3D:
+		_freeze_viewport()
+		return
 	var world := _resolve_node_3d()
 	if world == null:
 		push_warning("Card3DViewer: Node3D missing; setup skipped.")
@@ -32,15 +38,14 @@ func set_interactive(enabled: bool) -> void:
 	_update_hint_visibility()
 
 
-func set_auto_rotate(enabled: bool) -> void:
-	var world := _resolve_node_3d()
-	if world != null and world.has_method("set_auto_rotate"):
-		world.set_auto_rotate(enabled)
-
-
 func _ready() -> void:
 	if button != null:
 		button.pressed.connect(_on_button_pressed)
+	if FREEZE_3D:
+		_freeze_viewport()
+		_ensure_hint_label()
+		set_interactive(false)
+		return
 	if viewport_container != null:
 		viewport_container.mouse_filter = Control.MOUSE_FILTER_STOP
 		if not viewport_container.gui_input.is_connected(_on_viewport_gui_input):
@@ -52,12 +57,24 @@ func _ready() -> void:
 		resized.connect(_on_resized)
 
 
+func _freeze_viewport() -> void:
+	if subviewport != null:
+		subviewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		subviewport.own_world_3d = false
+	if viewport_container != null:
+		viewport_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if _hint_label != null:
+		_hint_label.text = "3D preview paused (image demo)"
+
+
 func _on_resized() -> void:
+	if FREEZE_3D:
+		return
 	_apply_performance()
 
 
 func _apply_performance() -> void:
-	if subviewport == null:
+	if FREEZE_3D or subviewport == null:
 		return
 	if PerformanceProfile != null:
 		PerformanceProfile.apply_to_subviewport(subviewport, self)
@@ -84,6 +101,9 @@ func _on_button_pressed() -> void:
 
 
 func frame_model(view_hint: String = "") -> void:
+	if FREEZE_3D:
+		_freeze_viewport()
+		return
 	var world := _resolve_node_3d()
 	if world == null:
 		push_warning("Card3DViewer: Node3D missing; frame_model skipped.")
@@ -106,7 +126,7 @@ func _ensure_hint_label() -> void:
 	_hint_label.offset_left = 8
 	_hint_label.offset_right = -8
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint_label.add_theme_font_size_override("font_size", 11)
+	_hint_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	_hint_label.add_theme_color_override("font_color", Color(0.75, 0.9, 0.98, 0.85))
 	add_child(_hint_label)
 	_update_hint_visibility()

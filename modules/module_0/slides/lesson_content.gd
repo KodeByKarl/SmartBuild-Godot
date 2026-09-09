@@ -30,8 +30,10 @@ static func help_for(slide_id: int) -> Dictionary:
 			return {"title": "Assess and control", "body": "Judge likelihood and severity, then reduce risk with training, safe lifting, and procedures."}
 		10:
 			return {"title": "Quality matters", "body": "Assess materials, document work, and keep inventory so servicing stays accountable."}
-		11, 12:
-			return {"title": "Interactive practice", "body": "Use this slide to explore concepts visually. Search opens the Parts Encyclopedia for related hardware."}
+		11:
+			return {"title": "What is a computer?", "body": "A computer accepts digital data, processes it, and produces results along the input → process → output path."}
+		12:
+			return {"title": "Types of computers", "body": "Computers are grouped by size and role: supercomputer, minicomputer, mainframe, and microcomputer."}
 		13:
 			return {"title": "How a computer works", "body": "Remember the loop: Input → Process → Output → Storage."}
 		14:
@@ -88,7 +90,7 @@ static func build(root: Control, slide_id: int) -> void:
 				content,
 				"WHERE CAN\nCSS TAKE YOU?",
 				"CSS NC II: Your Entry Point into the IT Industry",
-				"CSS NC II develops competencies in diagnosing, troubleshooting, repairing, and maintaining computer systems. Possible roles: Computer Servicing & Repair, Technical Support, Hardware Installation, Network Support, and IT-related service environments.",
+				"CSS NC II develops competencies in diagnosing, troubleshooting, repairing, and maintaining computer systems.\n\nPossible roles: Computer Servicing & Repair, Technical Support, Hardware Installation, Network Support, and IT-related service environments.",
 				IMG + "slide3-1.png",
 				IMG + "slide3-2.png"
 			)
@@ -179,6 +181,33 @@ static func build(root: Control, slide_id: int) -> void:
 					{"title": "INVENTORY", "body": "Track components and specs systematically. Good technicians work safely, carefully, and systematically.", "art": CARD + "card_storage.png"},
 				]
 			)
+		11:
+			Module0SlideBuilder.hero_split(
+				content,
+				CARD + "card_system_unit.png",
+				"WHAT IS A COMPUTER?",
+				"Understanding the Basics of Computing",
+				[
+					"A computer is a device that accepts digital data, processes it according to a set of instructions, and produces meaningful results. It follows a simple but powerful model:",
+					"INPUT → PROCESS → OUTPUT",
+					"Computers help us process information, store data, communicate, and perform tasks efficiently. From classrooms to businesses, computers connect people to digital services and make everyday work faster smarter."
+				],
+				true,
+				0.95
+			)
+		12:
+			Module0SlideBuilder.header_and_cards(
+				content,
+				"DIFFERENT TYPES OF COMPUTERS",
+				"Categorized by Size and Function",
+				"",
+				[
+					{"title": "SUPERCOMPUTER", "body": "Extremely powerful machines used for complex research, weather forecasting, and scientific exploration.", "art": CARD + "card_growth.png"},
+					{"title": "MINICOMPUTER", "body": "Midrange systems that support multiple users and are used in business and engineering environments.", "art": CARD + "card_network.png"},
+					{"title": "MAINFRAME", "body": "Large-scale systems that handle massive amounts of data and support many users simultaneously.", "art": CARD + "card_motherboard.png"},
+					{"title": "MICROCOMPUTER", "body": "The most common type, including desktops, laptops, tablets, and smartphones used daily.", "art": CARD + "card_system_unit.png"},
+				]
+			)
 		13:
 			Module0SlideBuilder.header_and_cards(
 				content,
@@ -251,8 +280,8 @@ static func build(root: Control, slide_id: int) -> void:
 			arts.size_flags_stretch_ratio = 0.9
 			arts.add_theme_constant_override("separation", 12)
 			row.add_child(arts)
-			arts.add_child(Module0SlideBuilder.make_art(IMG + "slide9-1.png", 140.0, 1.4))
-			arts.add_child(Module0SlideBuilder.make_art(IMG + "slide9-2.png", 140.0, 1.4))
+			arts.add_child(Module0SlideBuilder.make_art(CARD + "card_ram.png", 160.0, 1.2))
+			arts.add_child(Module0SlideBuilder.make_art(CARD + "card_storage.png", 160.0, 1.2))
 			var text := VBoxContainer.new()
 			text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			text.size_flags_stretch_ratio = 1.15

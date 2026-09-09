@@ -35,17 +35,26 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 
 [node name="Header" type="HBoxContainer" parent="Wrapper"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 theme_override_constants/separation = 12
 
+[node name="ExitButton" type="Button" parent="Wrapper/Header"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("4_exit")
+icon_alignment = 1
+expand_icon = true
+
 [node name="ModuleLabel" type="Label" parent="Wrapper/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 text = "MODULE 1 • Installing and Configuring Computer Systems"
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 1)
 autowrap_mode = 0
 text_overrun_behavior = 3
@@ -54,7 +63,7 @@ text_overrun_behavior = 3
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Guided Simulation"
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 17
 theme_override_colors/font_color = Color(0.09019608, 0.6509804, 0.8745098, 1)
 autowrap_mode = 0
 
@@ -80,60 +89,42 @@ size_flags_vertical = 0
 theme_override_constants/separation = 18
 
 [node name="Navigation" type="HBoxContainer" parent="Wrapper"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
 size_flags_vertical = 0
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 16
 
 [node name="LeftGutter" type="Control" parent="Wrapper/Navigation"]
-custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="Buttons" type="HBoxContainer" parent="Wrapper/Navigation"]
+[node name="PreviousButton" type="Button" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 8
-
-[node name="PreviousButton" type="Button" parent="Wrapper/Navigation/Buttons"]
-custom_minimum_size = Vector2(60, 60)
-layout_mode = 2
+size_flags_vertical = 4
 icon = ExtResource("2_prev")
 icon_alignment = 1
 expand_icon = true
 
-[node name="Spacer3" type="Control" parent="Wrapper/Navigation/Buttons"]
-custom_minimum_size = Vector2(12, 0)
+[node name="PageCounterLabel" type="Label" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
+size_flags_vertical = 4
+text = "1 / 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.82)
 
-[node name="NextButton" type="Button" parent="Wrapper/Navigation/Buttons"]
-custom_minimum_size = Vector2(60, 60)
+[node name="NextButton" type="Button" parent="Wrapper/Navigation"]
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
+size_flags_vertical = 4
 icon = ExtResource("3_next")
 icon_alignment = 1
 expand_icon = true
 
-[node name="Spacer" type="Control" parent="Wrapper/Navigation"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PageCounterLabel" type="Label" parent="Wrapper/Navigation"]
-layout_mode = 2
-text = "1 / 1"
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.9529412, 0.98039216, 0.99215686, 0.82)
-
-[node name="Spacer2" type="Control" parent="Wrapper/Navigation"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="ExitButton" type="Button" parent="Wrapper/Navigation"]
-custom_minimum_size = Vector2(60, 60)
-layout_mode = 2
-icon = ExtResource("4_exit")
-icon_alignment = 1
-expand_icon = true
-
 [node name="RightGutter" type="Control" parent="Wrapper/Navigation"]
-custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
+size_flags_horizontal = 3

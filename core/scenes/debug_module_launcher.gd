@@ -40,13 +40,13 @@ func _build() -> void:
 	margin.add_child(col)
 	var title := Label.new()
 	title.text = "DEBUG — Simulation launcher"
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(22))
 	title.add_theme_color_override("font_color", CYAN)
 	col.add_child(title)
 	var hint := Label.new()
 	hint.text = "Auth / Home live in Compose. This picker is editor-only."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	hint.add_theme_color_override("font_color", Color(0.75, 0.88, 0.95, 0.9))
 	col.add_child(hint)
 	for entry in MODULES:

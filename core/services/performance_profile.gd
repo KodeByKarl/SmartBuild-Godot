@@ -9,7 +9,6 @@ signal quality_changed(quality: Quality)
 var quality: Quality = Quality.MEDIUM
 var max_fps: int = 60
 var viewport_scale: float = 1.0
-var auto_rotate_speed: float = 0.85
 var enable_page_motion: bool = true
 var enable_model_intro: bool = true
 var subviewport_update_when_visible_only: bool = false
@@ -38,6 +37,17 @@ func _detect_and_apply() -> void:
 		if pixels < 1_600_000:
 			low_end = true
 
+	# Android demo path: never use HIGH. Heavy Sketchfab pages hitch on Next
+	# when the viewport is full-res and model intros are playing.
+	if OS.get_name() == "Android":
+		if low_end:
+			set_quality(Quality.LOW)
+		else:
+			set_quality(Quality.MEDIUM)
+		enable_model_intro = false
+		subviewport_update_when_visible_only = true
+		return
+
 	if low_end:
 		set_quality(Quality.LOW)
 	elif pixels >= 2_500_000:
@@ -52,21 +62,18 @@ func set_quality(new_quality: Quality) -> void:
 		Quality.HIGH:
 			max_fps = 60
 			viewport_scale = 1.0
-			auto_rotate_speed = 0.85
 			enable_page_motion = true
 			enable_model_intro = true
 			subviewport_update_when_visible_only = false
 		Quality.MEDIUM:
 			max_fps = 45
 			viewport_scale = 0.85
-			auto_rotate_speed = 0.7
 			enable_page_motion = true
 			enable_model_intro = true
 			subviewport_update_when_visible_only = false
 		Quality.LOW:
 			max_fps = 30
 			viewport_scale = 0.55
-			auto_rotate_speed = 0.45
 			enable_page_motion = true
 			enable_model_intro = false
 			subviewport_update_when_visible_only = true

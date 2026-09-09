@@ -32,6 +32,8 @@ var _state_col: VBoxContainer = null
 var _action_columns: BoxContainer = null
 var _action_scroll: ScrollContainer = null
 var _action_buttons: Dictionary = {}
+var _name_edit: LineEdit = null
+var _guide_label: RichTextLabel = null
 
 
 func _ready() -> void:
@@ -58,8 +60,13 @@ func setup(_unused: Array = [], hints: bool = true) -> void:
 	if _status == null:
 		call_deferred("setup", _unused, hints)
 		return
+	# Each visit starts clean so the Permissions capstone cannot inherit the
+	# guided workstation's folders/users and look "already done".
+	reset_scenario()
+	guided_hints = hints
 	_refresh_action_states()
 	_refresh_hints()
+	_refresh_guide()
 	if _hint_target != "":
 		_scroll_to_hint()
 
@@ -70,6 +77,7 @@ func set_guided_hint(target: String, destination: String) -> void:
 	_apply_access_test_hint()
 	_refresh_hints()
 	_refresh_action_states()
+	_refresh_guide()
 	_scroll_to_hint()
 
 
@@ -89,6 +97,7 @@ func reset_scenario() -> void:
 	if _log != null:
 		_log.text = "Windows PowerShell transcript ready."
 	_refresh_all()
+	_refresh_guide()
 	_refresh_status("Server Manager reset — configure shares from a clean state.")
 
 
@@ -119,7 +128,7 @@ func _build_ui() -> void:
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.add_theme_font_size_override("font_size", 12)
+	_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_status.add_theme_color_override("font_color", Color(0.78, 0.9, 0.98))
 	root.add_child(_status)
 
@@ -175,8 +184,8 @@ func _build_state_column() -> VBoxContainer:
 	_log.scroll_active = true
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 62)
-	_log.add_theme_font_size_override("normal_font_size", 11)
-	_log.add_theme_font_size_override("bold_font_size", 11)
+	_log.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
+	_log.add_theme_font_size_override("bold_font_size", ResponsiveLayout.readable_font(11))
 	_log.add_theme_color_override("default_color", Color(0.75, 0.78, 0.82))
 	_log.text = "Windows PowerShell transcript ready."
 	col.add_child(_section("Event log", _log))
@@ -201,12 +210,12 @@ func _build_title_bar() -> PanelContainer:
 	var title := Label.new()
 	title.text = "Server Manager  ·  Local Server (SERVER01)"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	title.add_theme_color_override("font_color", Color(0.95, 0.97, 1.0))
 	row.add_child(title)
 	var sub := Label.new()
 	sub.text = "File and Storage Services"
-	sub.add_theme_font_size_override("font_size", 11)
+	sub.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	sub.add_theme_color_override("font_color", Color(0.75, 0.88, 0.98, 0.9))
 	row.add_child(sub)
 	return bar
@@ -237,9 +246,26 @@ func _build_action_column() -> PanelContainer:
 
 	var hdr := Label.new()
 	hdr.text = "Server Manager · Actions"
-	hdr.add_theme_font_size_override("font_size", 11)
+	hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	hdr.add_theme_color_override("font_color", Color(0.82, 0.86, 0.92))
 	col.add_child(hdr)
+
+	_guide_label = RichTextLabel.new()
+	_guide_label.bbcode_enabled = true
+	_guide_label.fit_content = true
+	_guide_label.scroll_active = false
+	_guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guide_label.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
+	_guide_label.add_theme_color_override("default_color", Color(0.78, 0.9, 0.98))
+	col.add_child(_guide_label)
+
+	col.add_child(_field_label("Type the name exactly, then tap the matching action"))
+	_name_edit = LineEdit.new()
+	_name_edit.placeholder_text = "Shares  ·  Accounting  ·  G_Accounting  ·  Anna"
+	_name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_name_edit.custom_minimum_size = Vector2(0, 34)
+	_name_edit.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
+	col.add_child(_name_edit)
 
 	_action_scroll = ScrollContainer.new()
 	_action_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -350,7 +376,7 @@ func _card_header(title: String, color: Color) -> Label:
 	var hdr := Label.new()
 	hdr.text = title
 	hdr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hdr.add_theme_font_size_override("font_size", 11)
+	hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	hdr.add_theme_color_override("font_color", color)
 	return hdr
 
@@ -358,7 +384,7 @@ func _card_header(title: String, color: Color) -> Label:
 func _state_label() -> Label:
 	var lbl := Label.new()
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl.add_theme_font_size_override("font_size", 12)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	lbl.add_theme_constant_override("line_spacing", 2)
 	lbl.add_theme_color_override("font_color", Color(0.88, 0.90, 0.94))
 	return lbl
@@ -424,7 +450,7 @@ func _action_list() -> VBoxContainer:
 func _field_label(text: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	lbl.add_theme_color_override("font_color", Color(0.65, 0.8, 0.9))
 	return lbl
 
@@ -434,7 +460,7 @@ func _client_option(entries: Array) -> OptionButton:
 	opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	opt.custom_minimum_size = Vector2(0, 32)
 	opt.clip_text = true
-	opt.add_theme_font_size_override("font_size", 12)
+	opt.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	for index in entries.size():
 		var entry: Array = entries[index]
 		opt.add_item(str(entry[0]), index)
@@ -450,7 +476,7 @@ func _action_btn(text: String, cb: Callable, state_key: String = "") -> Button:
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	btn.custom_minimum_size = Vector2(0, 30)
 	btn.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0))
-	btn.add_theme_font_size_override("font_size", 12)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	btn.set_meta("base_text", text)
 	btn.pressed.connect(cb)
 	_style_action_btn(btn, false)
@@ -494,9 +520,13 @@ func _identify(role: String) -> void:
 	_log_line("Identified: %s" % role)
 	_emit("identify", role, "")
 	_refresh_all()
+	_refresh_guide()
 
 
 func _mkdir(folder_id: String) -> void:
+	if not _typed_matches(folder_id):
+		_name_reject(folder_id)
+		return
 	if folder_id == "accounting" or folder_id == "hr":
 		if not _folders.has("shares_root"):
 			_log_line("Create D:\\Shares first.")
@@ -505,21 +535,33 @@ func _mkdir(folder_id: String) -> void:
 	_folders[folder_id] = true
 	_log_line("Created: %s" % _folder_label(folder_id))
 	_emit("mkdir", folder_id, "")
+	_name_edit.text = ""
 	_refresh_all()
+	_refresh_guide()
 
 
 func _create_group(group_id: String) -> void:
+	if not _typed_matches(group_id):
+		_name_reject(group_id)
+		return
 	_groups[group_id] = true
 	_log_line("Group created: %s" % group_id)
 	_emit("create_group", group_id, "")
+	_name_edit.text = ""
 	_refresh_all()
+	_refresh_guide()
 
 
 func _create_user(user_id: String, default_group: String) -> void:
+	if not _typed_matches(user_id):
+		_name_reject(user_id)
+		return
 	_users[user_id] = ""
 	_log_line("User created: %s" % user_id)
 	_emit("create_user", user_id, default_group)
+	_name_edit.text = ""
 	_refresh_all()
+	_refresh_guide()
 
 
 func _add_to_group(user_id: String, group_id: String) -> void:
@@ -596,6 +638,84 @@ func _folder_label(folder_id: String) -> String:
 			return "HumanResources"
 		_:
 			return folder_id
+
+
+func _canonical_name(id: String) -> String:
+	match id:
+		"shares_root":
+			return "D:\\Shares"
+		"accounting":
+			return "Accounting"
+		"hr":
+			return "HumanResources"
+		"g_accounting":
+			return "G_Accounting"
+		"g_hr":
+			return "G_HR"
+		"anna":
+			return "Anna"
+		"hiro":
+			return "Hiro"
+		_:
+			return id
+
+
+func _name_aliases(id: String) -> PackedStringArray:
+	var names := PackedStringArray()
+	names.append(_canonical_name(id))
+	match id:
+		"shares_root":
+			names.append("Shares")
+			names.append("D:/Shares")
+		"hr":
+			names.append("HR")
+		"g_accounting":
+			names.append("G_ACCOUNTING")
+		"g_hr":
+			names.append("G_HR")
+	return names
+
+
+func _typed_matches(id: String) -> bool:
+	if _name_edit == null:
+		return false
+	var typed: String = _name_edit.text.strip_edges().to_lower().replace("/", "\\")
+	if typed == "":
+		return false
+	for alias in _name_aliases(id):
+		if typed == alias.strip_edges().to_lower().replace("/", "\\"):
+			return true
+	return false
+
+
+func _name_reject(id: String) -> void:
+	var need := _canonical_name(id)
+	_log_line("Type %s in the name box first." % need)
+	_refresh_status("Type the fixed name %s, then tap the action again." % need)
+	if _name_edit != null:
+		_name_edit.placeholder_text = need
+		_name_edit.grab_focus()
+
+
+func _refresh_guide() -> void:
+	if _guide_label == null:
+		return
+	var next_name := _canonical_name(_hint_target) if _hint_target != "" else ""
+	if _name_edit != null and next_name != "" and _hint_target in ["shares_root", "accounting", "hr", "g_accounting", "g_hr", "anna", "hiro"]:
+		_name_edit.placeholder_text = next_name
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("[b]How to build the file server[/b]")
+	lines.append("1. Identify File Server, then NAS.")
+	lines.append("2. Type [code]D:\\Shares[/code] → New Folder.")
+	lines.append("3. Type [code]Accounting[/code] and [code]HumanResources[/code] under Shares.")
+	lines.append("4. Type [code]G_Accounting[/code] / [code]G_HR[/code] → New Group.")
+	lines.append("5. Type [code]Anna[/code] → New User, then nest her in G_Accounting.")
+	lines.append("6. NTFS Modify on each folder, publish both shares.")
+	lines.append("7. Client test: Anna + Accounting = allow; Anna + HR = deny.")
+	if guided_hints and _hint_target != "":
+		lines.append("")
+		lines.append("[color=#9cf]Now: follow the yellow action. Names must match exactly.[/color]")
+	_guide_label.text = "\n".join(lines)
 
 
 func _refresh_all() -> void:

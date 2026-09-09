@@ -51,7 +51,7 @@ func _build_ui() -> void:
 
 	var eyebrow := Label.new()
 	eyebrow.text = "MODULE 0 COMPLETE"
-	eyebrow.add_theme_font_size_override("font_size", 14)
+	eyebrow.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))
 	eyebrow.add_theme_color_override("font_color", CYAN)
 	root.add_child(eyebrow)
 
@@ -74,14 +74,14 @@ func _build_ui() -> void:
 
 	var greet := Label.new()
 	greet.text = "Congratulations!"
-	greet.add_theme_font_size_override("font_size", 42)
+	greet.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(42))
 	greet.add_theme_color_override("font_color", WHITE)
 	greet_col.add_child(greet)
 
 	var sub := Label.new()
 	sub.text = "You finished Introduction to Computer Systems Servicing.\nHere’s everything you unlocked along the way."
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sub.add_theme_font_size_override("font_size", 16)
+	sub.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(16))
 	sub.add_theme_color_override("font_color", Color(0.78, 0.9, 0.96, 0.95))
 	greet_col.add_child(sub)
 
@@ -124,7 +124,7 @@ func _build_ui() -> void:
 
 	_progress_label = Label.new()
 	_progress_label.text = "0%"
-	_progress_label.add_theme_font_size_override("font_size", 28)
+	_progress_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(28))
 	_progress_label.add_theme_color_override("font_color", WHITE)
 	progress_row.add_child(_progress_label)
 
@@ -132,7 +132,7 @@ func _build_ui() -> void:
 	progress_copy.text = "Module progress"
 	progress_copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	progress_copy.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	progress_copy.add_theme_font_size_override("font_size", 15)
+	progress_copy.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 	progress_copy.add_theme_color_override("font_color", Color(0.75, 0.9, 0.98, 0.9))
 	progress_row.add_child(progress_copy)
 
@@ -161,7 +161,7 @@ func _build_ui() -> void:
 
 	var checklist_title := Label.new()
 	checklist_title.text = "Achievements unlocked"
-	checklist_title.add_theme_font_size_override("font_size", 16)
+	checklist_title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(16))
 	checklist_title.add_theme_color_override("font_color", CYAN)
 	root.add_child(checklist_title)
 
@@ -202,7 +202,7 @@ func _build_ui() -> void:
 	_home_btn.add_theme_stylebox_override("disabled", btn_style)
 	_home_btn.add_theme_color_override("font_color", NAVY)
 	_home_btn.add_theme_color_override("font_disabled_color", Color(0.02, 0.08, 0.12, 0.55))
-	_home_btn.add_theme_font_size_override("font_size", 16)
+	_home_btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(16))
 	_home_btn.pressed.connect(func() -> void: proceed_home.emit())
 	root.add_child(_home_btn)
 
@@ -250,14 +250,14 @@ func _make_checklist_row(title_text: String, detail_text: String, checked: bool)
 
 	var title := Label.new()
 	title.text = title_text
-	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 	title.add_theme_color_override("font_color", WHITE)
 	copy.add_child(title)
 
 	var detail := Label.new()
 	detail.text = detail_text
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.add_theme_font_size_override("font_size", 12)
+	detail.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	detail.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95, 0.85))
 	copy.add_child(detail)
 

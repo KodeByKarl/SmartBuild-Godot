@@ -71,6 +71,7 @@ var _log: RichTextLabel = null
 var _columns: BoxContainer = null
 var _work_col: VBoxContainer = null
 var _tool_buttons: Dictionary = {}
+var _howto: RichTextLabel = null
 
 
 func _ready() -> void:
@@ -118,6 +119,7 @@ func set_guided_hint(target: String, _destination: String) -> void:
 	_refresh_all()
 	if guided_hints:
 		_refresh_status("Next: %s" % _action_title(target))
+	_refresh_howto()
 
 
 func mark_step_done(target: String, _destination: String) -> void:
@@ -160,9 +162,18 @@ func _build_ui() -> void:
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.add_theme_font_size_override("font_size", 12)
+	_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_status.add_theme_color_override("font_color", Color(0.78, 0.9, 0.98))
 	root.add_child(_status)
+
+	_howto = RichTextLabel.new()
+	_howto.bbcode_enabled = true
+	_howto.fit_content = true
+	_howto.scroll_active = false
+	_howto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_howto.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(12))
+	_howto.add_theme_color_override("default_color", Color(0.82, 0.92, 0.98))
+	root.add_child(_howto)
 
 	# Plain BoxContainer so the orientation can flip on narrow screens.
 	_columns = BoxContainer.new()
@@ -208,7 +219,7 @@ func _build_work_column() -> VBoxContainer:
 	_target_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_target_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_target_label.clip_text = true
-	_target_label.add_theme_font_size_override("font_size", 12)
+	_target_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_target_label.add_theme_color_override("font_color", Color(0.55, 0.85, 0.98))
 	head.add_child(_target_label)
 
@@ -253,7 +264,7 @@ func _build_work_column() -> VBoxContainer:
 
 	var pal_hdr := Label.new()
 	pal_hdr.text = "CONDUCTORS"
-	pal_hdr.add_theme_font_size_override("font_size", 10)
+	pal_hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	pal_hdr.add_theme_color_override("font_color", Color(0.45, 0.8, 0.95, 0.9))
 	col.add_child(pal_hdr)
 
@@ -280,7 +291,7 @@ func _build_tool_column() -> PanelContainer:
 
 	var hdr := Label.new()
 	hdr.text = "CRIMPING TOOLS"
-	hdr.add_theme_font_size_override("font_size", 11)
+	hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	hdr.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	col.add_child(hdr)
 
@@ -309,8 +320,8 @@ func _build_tool_column() -> PanelContainer:
 	_log.scroll_active = true
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 62)
-	_log.add_theme_font_size_override("normal_font_size", 11)
-	_log.add_theme_font_size_override("bold_font_size", 11)
+	_log.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
+	_log.add_theme_font_size_override("bold_font_size", ResponsiveLayout.readable_font(11))
 	_log.add_theme_color_override("default_color", Color(0.7, 0.92, 0.78))
 	_log.text = "Bench ready."
 	col.add_child(_section("Tester / log", _log))
@@ -340,7 +351,7 @@ func _section(title: String, body: Control) -> PanelContainer:
 	panel.add_child(col)
 	var hdr := Label.new()
 	hdr.text = title.to_upper()
-	hdr.add_theme_font_size_override("font_size", 10)
+	hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	hdr.add_theme_color_override("font_color", Color(0.45, 0.82, 0.95, 0.9))
 	col.add_child(hdr)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -355,7 +366,7 @@ func _tool_btn(text: String, act: String) -> Button:
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	btn.custom_minimum_size = Vector2(0, 28)
-	btn.add_theme_font_size_override("font_size", 12)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	btn.set_meta("base_text", text)
 	btn.pressed.connect(func() -> void: _perform(act))
 	_tool_buttons[act] = btn
@@ -400,6 +411,7 @@ func _draw_connector() -> void:
 	var lane_h: float = area.y - body_h - num_h - 6.0
 	var row: Array = _pins[_active_end]
 	var font: Font = ThemeDB.fallback_font
+	_draw_prep_state(pad)
 
 	for index in 8:
 		var x: float = pad + float(index) * lane_w
@@ -449,6 +461,35 @@ func _draw_connector() -> void:
 		11,
 		Color(0.75, 0.88, 0.96, 0.85)
 	)
+
+
+func _draw_prep_state(pad: float) -> void:
+	# Tiny cable-prep diagram so strip / untwist / insert is visible, not only a button.
+	var y := 4.0
+	var h := 10.0
+	var x := pad
+	var w: float = maxf(_connector.size.x - pad * 2.0, 40.0)
+	if not _cable_selected:
+		_connector.draw_rect(Rect2(x, y, w * 0.55, h), Color(0.45, 0.5, 0.55, 0.9), true)
+		return
+	if not _stripped:
+		_connector.draw_rect(Rect2(x, y, w * 0.7, h), Color(0.55, 0.42, 0.22, 0.95), true)
+		_connector.draw_rect(Rect2(x + w * 0.55, y + 1.0, w * 0.18, h - 2.0), Color(0.85, 0.55, 0.2, 0.7), true)
+		return
+	# Stripped: jacket + four pair stubs.
+	_connector.draw_rect(Rect2(x, y, w * 0.38, h), Color(0.55, 0.42, 0.22, 0.95), true)
+	var pair_cols: Array = [
+		Color(0.95, 0.55, 0.16), Color(0.18, 0.72, 0.34),
+		Color(0.26, 0.46, 0.93), Color(0.55, 0.36, 0.2)
+	]
+	var pair_x: float = x + w * 0.4
+	for i in 4:
+		var px: float = pair_x + float(i) * 10.0
+		if _untwisted:
+			_connector.draw_rect(Rect2(px, y, 3.0, h), pair_cols[i], true)
+			_connector.draw_rect(Rect2(px + 4.0, y, 3.0, h), Color(0.93, 0.95, 0.97, 0.95), true)
+		else:
+			_connector.draw_rect(Rect2(px, y + 1.0, 7.0, h - 2.0), pair_cols[i], true)
 
 
 func _draw_wire(rect: Rect2, wire: String) -> void:
@@ -769,6 +810,7 @@ func _refresh_all() -> void:
 		_reference.queue_redraw()
 	if _connector != null:
 		_connector.queue_redraw()
+	_refresh_howto()
 
 
 func _refresh_palette() -> void:
@@ -779,7 +821,7 @@ func _refresh_palette() -> void:
 	if not _untwisted:
 		var hint := Label.new()
 		hint.text = "Pairs still twisted — run tools 1 to 3 first."
-		hint.add_theme_font_size_override("font_size", 11)
+		hint.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 		hint.add_theme_color_override("font_color", Color(0.6, 0.75, 0.85, 0.85))
 		_palette.add_child(hint)
 		return
@@ -792,7 +834,7 @@ func _refresh_palette() -> void:
 		chip.focus_mode = Control.FOCUS_NONE
 		chip.disabled = used
 		chip.custom_minimum_size = Vector2(0, 28)
-		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 		_style_wire_chip(chip, wire, used, wire == _selected_wire)
 		chip.pressed.connect(func() -> void: _select_wire(wire))
 		_palette.add_child(chip)
@@ -890,7 +932,7 @@ func _style_pin_btn(btn: Button, filled: bool, highlight: bool = false) -> void:
 	btn.add_theme_stylebox_override("hover", style)
 	btn.add_theme_stylebox_override("pressed", style)
 	btn.add_theme_stylebox_override("disabled", style)
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	btn.add_theme_color_override("font_color", Color(0.9, 0.96, 1.0))
 
 
@@ -946,6 +988,52 @@ func _action_title(act: String) -> String:
 		"test_cable":
 			return "test the finished cable"
 	return act
+
+
+func _refresh_howto() -> void:
+	if _howto == null:
+		return
+	var act: String = _hint_target if _hint_target != "" else _current_physical_act()
+	var title := "How this step works"
+	var body := ""
+	match act:
+		"select_cable":
+			body = "Pick Cat 6 UTP stock. Cut a working length before you touch the jacket. Both ends of a straight-through use the same standard; a crossover uses T568A on one end and T568B on the other."
+		"strip_jacket":
+			body = "Score the jacket about 25 mm from the end and pull it off. Do not nick the insulation on the four pairs. You should see orange, green, blue, and brown pairs still twisted."
+		"untwist_pairs":
+			body = "Untwist each pair only as far as you need, then fan the eight conductors flat. Keep pair twists behind the jacket line — that is what rejects noise."
+		"order_end_a", "order_end_b":
+			body = "Tap a conductor, then tap its pin (1–8). Straight-through: [b]T568B on both plugs[/b]. Crossover: [b]T568A on End A, T568B on End B[/b] (orange and green pairs swap)."
+		"insert_end_a", "insert_end_b", "insert_end":
+			body = "Slide the ordered conductors into the RJ45 until they hit the front of the plug. The jacket must sit inside the strain-relief. Look through the nose — you should see copper at every pin."
+		"crimp_end_a", "crimp_end_b", "crimp_end":
+			body = "Place the plug in the crimper and squeeze once, firmly. Gold contacts pierce each conductor and the bar locks the jacket. A light crimp fails the wire map."
+		"test_cable":
+			body = "Plug both ends into the tester. Straight-through reads 1–1 … 8–8. Crossover reads 1–3, 2–6, 3–1, 6–2. Fail → cut the bad plug off and rebuild that end."
+		"cut_end":
+			body = "If the map fails, cut that plug off, strip a fresh 25 mm, and start the end again. The other end can stay if it was already certified."
+		_:
+			body = "Work top to bottom: select → strip → untwist → order pins → insert → crimp → switch ends → test. Cut a plug off only to repair a fail."
+	if not guided_hints:
+		body = "Build both ends, then test. The pinout is not shown — recall T568A / T568B from the bench."
+	_howto.text = "[b]%s[/b]\n%s" % [title, body]
+
+
+func _current_physical_act() -> String:
+	if not _cable_selected:
+		return "select_cable"
+	if not _stripped:
+		return "strip_jacket"
+	if not _untwisted:
+		return "untwist_pairs"
+	if not bool(_inserted[_active_end]) and not bool(_crimped[_active_end]):
+		return "insert_end_%s" % _active_end
+	if not bool(_crimped[_active_end]):
+		return "crimp_end_%s" % _active_end
+	if not _tested:
+		return "test_cable"
+	return ""
 
 
 func _warn(text: String) -> void:

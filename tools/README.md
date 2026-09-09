@@ -34,6 +34,20 @@ godot --headless --path . --script res://tools/regress_probe.gd
 
 Report file: `%APPDATA%\Godot\app_userdata\SmartBuildGodot\regress_probe.txt`
 
+## UI chrome probe
+
+`UiChangeProbe.tscn` checks the shared shell chrome across Module 0 and Modules 1–4:
+Exit pinned to the top-left of the header, Prev / page counter / Next grouped in the
+nav bar, Assessment opening on the assessment page, the completion page not exiting
+until the learner leaves it, and touch-drag scrolling being attached to new
+`ScrollContainer`s. Unlike `regress_probe` it needs a scene, not `--script`:
+
+```text
+godot --headless --path . res://tools/UiChangeProbe.tscn
+```
+
+Exits non-zero on the first failed check.
+
 ### GitHub Actions
 
 `.github/workflows/godot-ci.yml` downloads Godot 4.7.2 and runs the same suite on push/PR to `main` / `master`.

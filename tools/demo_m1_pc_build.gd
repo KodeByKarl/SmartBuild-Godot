@@ -90,9 +90,13 @@ func _run() -> void:
 	var build_index := -1
 	for i in pages.size():
 		var p: Dictionary = pages[i] as Dictionary
-		if str(p.get("sim_mode", "")) == "pc_build" and str(p.get("type", "")) == "guided_simulation":
-			build_index = i
-			break
+		if str(p.get("sim_mode", "")) != "pc_build" or str(p.get("type", "")) != "guided_simulation":
+			continue
+		var seed: Variant = p.get("seed_state", [])
+		if seed is Array and not (seed as Array).is_empty():
+			continue
+		build_index = i
+		break
 	if build_index < 0:
 		_fail("pc_build guided page not found")
 		_finish(1)

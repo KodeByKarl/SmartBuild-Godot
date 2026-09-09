@@ -52,6 +52,14 @@ const PART_HOME := {
 @onready var _hint_label: Label = $Root/ViewportCard/ViewportMargin/HintLabel
 @onready var _selected_label: Label = $Root/TrayCard/TrayMargin/TrayVBox/SelectedLabel
 @onready var _slot_buttons: HFlowContainer = null
+@onready var _viewport_margin: MarginContainer = $Root/ViewportCard/ViewportMargin
+
+## 3D bench for guided/assessment simulations. Catalogs stay 2D images.
+const USE_IMAGE_BOARD := false
+
+var _case_board: GridContainer = null
+var _bay_buttons: Dictionary = {} # slot_id -> Button
+var _bay_icons: Dictionary = {} # slot_id -> TextureRect
 
 var parts: Array = []
 var slots: Dictionary = {}
@@ -79,6 +87,8 @@ var _drag_part_id: String = ""
 var _drag_ghost: Control = null
 var _press_part_id: String = ""
 var _press_pos := Vector2.ZERO
+var _pending_seed: Array = []
+var _interaction_locked := false
 
 
 func _ready() -> void:
@@ -101,30 +111,47 @@ func _ready() -> void:
 		root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_ensure_case_visual()
-	if _viewport_container != null:
+	if not USE_IMAGE_BOARD:
+		_ensure_case_visual()
+	_ensure_image_board()
+	if USE_IMAGE_BOARD:
+		if _viewport_container != null:
+			_viewport_container.visible = false
+			_viewport_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if _subviewport != null:
+			_subviewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+			_subviewport.own_world_3d = false
+	elif _viewport_container != null:
 		_viewport_container.mouse_filter = Control.MOUSE_FILTER_STOP
 		if not _viewport_container.gui_input.is_connected(_on_viewport_gui_input):
 			_viewport_container.gui_input.connect(_on_viewport_gui_input)
-	if _subviewport != null:
-		_subviewport.own_world_3d = true
-		_subviewport.transparent_bg = false
-		_subviewport.handle_input_locally = true
-		_subviewport.physics_object_picking = true
-		var profile := get_node_or_null("/root/PerformanceProfile")
-		if profile != null and profile.has_method("apply_to_subviewport"):
-			profile.call("apply_to_subviewport", _subviewport, _viewport_container)
-		else:
-			_subviewport.size = Vector2i(960, 540)
+		if _subviewport != null:
+			_subviewport.own_world_3d = true
+			_subviewport.transparent_bg = false
+			_subviewport.handle_input_locally = true
+			_subviewport.physics_object_picking = true
+			var profile := get_node_or_null("/root/PerformanceProfile")
+			if profile != null and profile.has_method("apply_to_subviewport"):
+				profile.call("apply_to_subviewport", _subviewport, _viewport_container)
+			else:
+				_subviewport.size = Vector2i(960, 540)
 	_build_default_slots()
-	_update_camera()
+	if not USE_IMAGE_BOARD:
+		_update_camera()
 	_refresh_selected_label()
 	set_process_input(true)
 	if _hint_label != null:
 		_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if USE_IMAGE_BOARD:
+			_hint_label.text = "Drag a part image from the tray onto a bay. Tap a filled bay to remove it."
+		else:
+			_hint_label.text = "Drag a 3D part from the tray onto its bay. Tap a seated part to remove it."
 	var tray_scroll := get_node_or_null("Root/TrayCard/TrayMargin/TrayVBox/TrayScroll") as ScrollContainer
 	if tray_scroll != null:
-		tray_scroll.scroll_deadzone = 28
+		tray_scroll.scroll_deadzone = 18
+		tray_scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+		tray_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		TouchDragScroll.attach(tray_scroll)
 	if not resized.is_connected(_on_resized):
 		resized.connect(_on_resized)
 	modulate.a = 1.0
@@ -133,6 +160,31 @@ func _ready() -> void:
 		_apply_setup(_pending_parts, guided_hints)
 		_has_pending_setup = false
 		_pending_parts.clear()
+	elif USE_IMAGE_BOARD:
+		_rebuild_slot_buttons()
+
+
+func _ensure_image_board() -> void:
+	if not USE_IMAGE_BOARD:
+		return
+	_bind_nodes()
+	if _viewport_margin == null:
+		_viewport_margin = get_node_or_null("Root/ViewportCard/ViewportMargin") as MarginContainer
+	if _viewport_margin == null:
+		return
+	if _case_board != null and is_instance_valid(_case_board):
+		return
+	_case_board = GridContainer.new()
+	_case_board.name = "ImageCaseBoard"
+	_case_board.columns = 3
+	_case_board.add_theme_constant_override("h_separation", 8)
+	_case_board.add_theme_constant_override("v_separation", 8)
+	_case_board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_case_board.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_viewport_margin.add_child(_case_board)
+	# Keep hint on top of the board.
+	if _hint_label != null:
+		_viewport_margin.move_child(_hint_label, _viewport_margin.get_child_count() - 1)
 
 
 func _bind_nodes() -> void:
@@ -156,8 +208,10 @@ func _bind_nodes() -> void:
 		_selected_label = get_node_or_null("Root/TrayCard/TrayMargin/TrayVBox/SelectedLabel") as Label
 
 
-func setup(part_defs: Array, use_guided_hints: bool = true) -> void:
+func setup(part_defs: Array, use_guided_hints: bool = true, seed: Array = []) -> void:
 	guided_hints = use_guided_hints
+	_pending_seed = seed.duplicate(true)
+	_interaction_locked = false
 	# setup() is often called before this node enters the tree (page root still orphaned),
 	# so @onready refs are still null — defer until _ready.
 	if not is_inside_tree() or _tray == null:
@@ -173,11 +227,22 @@ func _apply_setup(part_defs: Array, use_guided_hints: bool = true) -> void:
 	_bind_nodes()
 	parts = part_defs.duplicate(true)
 	guided_hints = use_guided_hints
-	_seed_state.clear()
-	_graded_removals = false
 	_rebuild_tray()
 	_clear_installed()
 	set_step_hint("", "")
+	if not _pending_seed.is_empty():
+		apply_seed_state(_pending_seed)
+	else:
+		_seed_state.clear()
+		_graded_removals = false
+	if USE_IMAGE_BOARD:
+		_rebuild_slot_buttons()
+
+
+func set_interaction_locked(on: bool) -> void:
+	_interaction_locked = on
+	if USE_IMAGE_BOARD:
+		_rebuild_slot_buttons()
 
 
 ## Load a pre-built machine for fix-the-assembly scenarios. Parts marked
@@ -284,11 +349,13 @@ func _on_resized() -> void:
 	var tray_card := get_node_or_null("Root/TrayCard") as Control
 	if tray_card != null:
 		if size.x > 0.0 and size.x < 720.0:
-			tray_card.custom_minimum_size.x = 156.0
-			tray_card.size_flags_stretch_ratio = 0.72
+			tray_card.custom_minimum_size.x = 188.0
+			tray_card.size_flags_stretch_ratio = 0.95
 		else:
 			tray_card.custom_minimum_size.x = 220.0
 			tray_card.size_flags_stretch_ratio = 0.58
+	if USE_IMAGE_BOARD:
+		return
 	var profile := get_node_or_null("/root/PerformanceProfile")
 	if profile != null and _subviewport != null and profile.has_method("apply_to_subviewport"):
 		profile.call("apply_to_subviewport", _subviewport, _viewport_container)
@@ -396,9 +463,100 @@ func _add_slot(id: String, title: String, pos: Vector3, size: Vector3) -> void:
 
 
 func _rebuild_slot_buttons() -> void:
-	# Slot chips were the cramped text row. Bays are now the 3D case itself.
-	if _slot_buttons != null:
-		_slot_buttons.visible = false
+	if not USE_IMAGE_BOARD:
+		if _slot_buttons != null:
+			_slot_buttons.visible = false
+		return
+	_ensure_image_board()
+	if _case_board == null:
+		return
+	# Stable bay order for the teaching board.
+	var order: Array[String] = [
+		"psu_bay", "board_mount", "storage_bay",
+		"cpu_socket", "cooler_mount", "dimm_slot",
+		"pcie_slot", "atx_socket", "eps_socket",
+		"fan_header", "front_panel", "side_panel",
+	]
+	for slot_id in order:
+		if not slots.has(slot_id):
+			continue
+		if not _bay_buttons.has(slot_id):
+			var btn := Button.new()
+			btn.custom_minimum_size = Vector2(0, 84)
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.focus_mode = Control.FOCUS_NONE
+			btn.clip_text = true
+			btn.pressed.connect(_on_bay_pressed.bind(slot_id))
+			var row := VBoxContainer.new()
+			row.add_theme_constant_override("separation", 2)
+			row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			btn.add_child(row)
+			var icon := TextureRect.new()
+			icon.custom_minimum_size = Vector2(0, 40)
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			row.add_child(icon)
+			var caption := Label.new()
+			caption.name = "BayCaption"
+			caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			caption.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
+			caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			row.add_child(caption)
+			_case_board.add_child(btn)
+			_bay_buttons[slot_id] = btn
+			_bay_icons[slot_id] = icon
+		_refresh_bay_button(slot_id)
+
+
+func _refresh_bay_button(slot_id: String) -> void:
+	var btn: Button = _bay_buttons.get(slot_id, null)
+	if btn == null:
+		return
+	var filled := _is_filled(slot_id)
+	var highlight := guided_hints and _hint_destination != "" and slot_id == _hint_destination and not filled
+	var part_id := ""
+	for pid in installed_parts.keys():
+		if str(installed_parts[pid]) == slot_id:
+			part_id = str(pid)
+			break
+	var caption: Label = btn.find_child("BayCaption", true, false) as Label
+	if caption != null:
+		if filled and part_id != "":
+			caption.text = "%s\n%s" % [_slot_title(slot_id), part_id.replace("_", " ")]
+		else:
+			caption.text = _slot_title(slot_id)
+	var icon: TextureRect = _bay_icons.get(slot_id, null)
+	if icon != null:
+		if filled and part_id != "":
+			icon.texture = _part_icon(part_id)
+			icon.modulate = Color(1.0, 0.55, 0.35, 1) if _faulty_installs.has(part_id) else Color.WHITE
+		else:
+			icon.texture = null
+	_style_slot_button(btn, highlight)
+	if filled:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.08, 0.28, 0.18, 0.95)
+		style.border_color = Color(0.35, 0.9, 0.55, 0.7)
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(10)
+		style.content_margin_left = 8
+		style.content_margin_right = 8
+		style.content_margin_top = 6
+		style.content_margin_bottom = 6
+		btn.add_theme_stylebox_override("normal", style)
+		btn.add_theme_stylebox_override("hover", style)
+		btn.add_theme_stylebox_override("pressed", style)
+
+
+func _on_bay_pressed(slot_id: String) -> void:
+	if _interaction_locked or _dragging_part:
+		return
+	if _is_filled(slot_id):
+		_try_remove(slot_id)
+	elif selected_part_id != "":
+		_try_install(slot_id)
 
 
 func _style_remove_button(button: Button) -> void:
@@ -415,7 +573,7 @@ func _style_remove_button(button: Button) -> void:
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_color_override("font_color", Color(1.0, 0.78, 0.7, 1))
-	button.add_theme_font_size_override("font_size", 12)
+	button.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 
 
 func _style_slot_button(button: Button, highlight: bool) -> void:
@@ -430,7 +588,7 @@ func _style_slot_button(button: Button, highlight: bool) -> void:
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_color_override("font_color", Color(0.05, 0.08, 0.1, 1) if highlight else Color(0.95, 0.98, 1, 1))
-	button.add_theme_font_size_override("font_size", 12)
+	button.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 
 
 func _rebuild_tray() -> void:
@@ -486,13 +644,13 @@ func _make_part_card(part: Dictionary) -> Control:
 	var title := Label.new()
 	title.text = str(part.get("label", part_id))
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	title.add_theme_color_override("font_color", Color(0.95, 0.98, 1, 1))
 	copy.add_child(title)
 
 	var hint := Label.new()
 	hint.text = "Drag onto case"
-	hint.add_theme_font_size_override("font_size", 10)
+	hint.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
 	hint.add_theme_color_override("font_color", Color(0.55, 0.82, 0.95, 0.85))
 	copy.add_child(hint)
 	card.set_meta("hint_label", hint)
@@ -565,6 +723,8 @@ func _style_part_card(card: Control, selected: bool, recommended: bool = false, 
 
 
 func _on_slot_input(_camera: Node, event: InputEvent, _pos: Vector3, _normal: Vector3, _shape_idx: int, slot_id: String) -> void:
+	if _interaction_locked:
+		return
 	var tapped: bool = (
 		(event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT)
 		or (event is InputEventScreenTouch and event.pressed)
@@ -581,6 +741,8 @@ func _on_slot_input(_camera: Node, event: InputEvent, _pos: Vector3, _normal: Ve
 
 
 func _try_install(slot_id: String) -> void:
+	if _interaction_locked:
+		return
 	if selected_part_id == "":
 		if _hint_label != null:
 			_hint_label.text = "Drag a part from the right tray onto this bay."
@@ -654,6 +816,8 @@ func _remove_block_reason(slot_id: String) -> String:
 ## Teardown mirrors assembly: pull the part out, hand it back to the tray, and
 ## leave the bay free to be rebuilt.
 func _try_remove(slot_id: String) -> void:
+	if _interaction_locked:
+		return
 	var blocked: String = _remove_block_reason(slot_id)
 	if blocked != "":
 		_warn(blocked)
@@ -695,18 +859,25 @@ func _warn(text: String) -> void:
 
 
 func _spawn_part_visual(part_id: String, slot_id: String, faulty: bool = false) -> void:
+	if USE_IMAGE_BOARD:
+		_rebuild_slot_buttons()
+		return
 	_bind_nodes()
 	if not slots.has(slot_id) or _installed_root == null:
 		return
 	var slot: Node3D = slots[slot_id]
-	# Teaching placeholders sized to the slot — imported glTFs were floating off-bay.
-	var visual: Node3D = _make_placeholder_part(part_id, faulty)
+	var visual: Node3D = _make_model_part(part_id, faulty)
+	var used_model := visual != null
+	if visual == null:
+		visual = _make_placeholder_part(part_id, faulty)
 	visual.name = "Installed_%s" % part_id
 	visual.set_meta("sb_installed_part", true)
+	visual.set_meta("sb_used_model", used_model)
+	visual.set_meta("sb_part_id", part_id)
 	# Parent to the slot so alignment always matches the bay.
 	slot.add_child(visual)
-	visual.position = Vector3.ZERO
 	visual.rotation = Vector3.ZERO
+	visual.position = Vector3.ZERO
 	visual.scale = Vector3.ONE * 0.2
 	call_deferred("_animate_snap_local", visual)
 
@@ -717,9 +888,19 @@ func _animate_snap_local(visual: Node3D) -> void:
 	await get_tree().process_frame
 	if not is_instance_valid(visual):
 		return
+	var used_model: bool = bool(visual.get_meta("sb_used_model", false))
+	if used_model:
+		_fit_visual(visual, _fit_size_for_part(str(visual.get_meta("sb_part_id", ""))))
+	else:
+		visual.position = Vector3.ZERO
+		visual.scale = Vector3.ONE
+	var target_scale: Vector3 = visual.scale
+	var target_pos: Vector3 = visual.position
+	visual.scale = target_scale * 0.2
+	visual.position = target_pos
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(visual, "scale", Vector3.ONE, 0.28)
+	tween.tween_property(visual, "scale", target_scale, 0.28)
 
 
 func _fit_size_for_part(part_id: String) -> float:
@@ -736,15 +917,82 @@ func _fit_size_for_part(part_id: String) -> float:
 			return 0.42
 		"cpu", "cooler":
 			return 0.28
+		"fan_cable", "atx_24pin", "cpu_power", "front_wires":
+			return 0.16
 		_:
 			return 0.26
 
 
 func _fit_visual(root: Node3D, target: float) -> void:
-	# Kept for compatibility; placeholders are pre-sized to slots.
 	root.scale = Vector3.ONE
-	var _t := target
-	_t = _t
+	root.position = Vector3.ZERO
+	var aabb := _combined_aabb(root)
+	var longest: float = maxf(aabb.size.x, maxf(aabb.size.y, aabb.size.z))
+	if longest < 0.0001:
+		return
+	var s: float = target / longest
+	root.scale = Vector3.ONE * s
+	root.position = -aabb.get_center() * s
+
+
+func _combined_aabb(root: Node3D) -> AABB:
+	var result := AABB()
+	var started := false
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node is MeshInstance3D:
+			var mi := node as MeshInstance3D
+			if mi.mesh != null:
+				var xf: Transform3D = root.global_transform.affine_inverse() * mi.global_transform
+				var box: AABB = xf * mi.get_aabb()
+				if not started:
+					result = box
+					started = true
+				else:
+					result = result.merge(box)
+		for child in node.get_children():
+			stack.append(child)
+	return result
+
+
+func _make_model_part(part_id: String, faulty: bool = false) -> Node3D:
+	var path := ""
+	for part_variant in parts:
+		if typeof(part_variant) != TYPE_DICTIONARY:
+			continue
+		var part: Dictionary = part_variant
+		if str(part.get("id", "")) == part_id:
+			path = str(part.get("scene_path", ""))
+			break
+	if path == "" or not ResourceLoader.exists(path):
+		return null
+	var res: Resource = load(path)
+	if not (res is PackedScene):
+		return null
+	var inst := (res as PackedScene).instantiate()
+	if inst == null or not (inst is Node3D):
+		if inst != null:
+			inst.queue_free()
+		return null
+	var root := Node3D.new()
+	root.name = part_id
+	root.add_child(inst)
+	if faulty:
+		_tint_model(root, Color(1.0, 0.55, 0.25, 1))
+	return root
+
+
+func _tint_model(node: Node, color: Color) -> void:
+	if node is GeometryInstance3D:
+		var overlay := StandardMaterial3D.new()
+		overlay.albedo_color = Color(color.r, color.g, color.b, 0.42)
+		overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		overlay.emission_enabled = true
+		overlay.emission = Color(color.r, color.g, color.b) * 0.35
+		(node as GeometryInstance3D).material_overlay = overlay
+	for child in node.get_children():
+		_tint_model(child, color)
 
 
 func _make_placeholder_part(part_id: String, faulty: bool = false) -> Node3D:
@@ -968,22 +1216,40 @@ func _placeholder_icon(part_id: String) -> Texture2D:
 	return tex
 
 
+func _pointer_global(event: InputEvent, host: Control = self) -> Vector2:
+	if event is InputEventMouse:
+		return (event as InputEventMouse).global_position
+	var local := Vector2.ZERO
+	if event is InputEventScreenTouch:
+		local = (event as InputEventScreenTouch).position
+	elif event is InputEventScreenDrag:
+		local = (event as InputEventScreenDrag).position
+	else:
+		return get_global_mouse_position()
+	if host != self:
+		return host.to_global(local)
+	return local
+
+
 func _on_part_card_input(event: InputEvent, part_id: String) -> void:
-	if installed_parts.has(part_id):
+	if _interaction_locked or installed_parts.has(part_id):
 		return
+	var card: Control = _part_buttons.get(part_id, null) as Control
+	var host: Control = card if card != null else self
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_begin_part_press(part_id, event.global_position)
 		else:
 			_finish_part_drag(event.global_position)
 	elif event is InputEventScreenTouch:
-		var touch_pos: Vector2 = event.position
+		var pos := _pointer_global(event, host)
 		if event.pressed:
-			_begin_part_press(part_id, get_global_mouse_position() if get_global_mouse_position() != Vector2.ZERO else touch_pos)
+			_begin_part_press(part_id, pos)
 		else:
-			_finish_part_drag(get_global_mouse_position())
+			_finish_part_drag(pos)
 	elif (event is InputEventMouseMotion or event is InputEventScreenDrag) and _press_part_id == part_id:
-		_update_part_drag(get_global_mouse_position())
+		var pos := _pointer_global(event, host)
+		_update_part_drag(pos)
 		if _dragging_part:
 			accept_event()
 
@@ -998,13 +1264,13 @@ func _input(event: InputEvent) -> void:
 	if _press_part_id == "" and not _dragging_part:
 		return
 	if event is InputEventMouseMotion or event is InputEventScreenDrag:
-		_update_part_drag(get_global_mouse_position())
+		_update_part_drag(_pointer_global(event, self))
 		if _dragging_part:
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		_finish_part_drag(get_global_mouse_position())
+		_finish_part_drag(_pointer_global(event, self))
 	elif event is InputEventScreenTouch and not event.pressed:
-		_finish_part_drag(get_global_mouse_position())
+		_finish_part_drag(_pointer_global(event, self))
 
 
 func _update_part_drag(global_pos: Vector2) -> void:
@@ -1012,10 +1278,10 @@ func _update_part_drag(global_pos: Vector2) -> void:
 		return
 	var delta: Vector2 = global_pos - _press_pos
 	if not _dragging_part:
-		if delta.length() < 14.0:
+		if delta.length() < 22.0:
 			return
 		# Mostly vertical and not pulling toward the case → let the tray scroll.
-		if absf(delta.y) > absf(delta.x) * 1.25 and delta.x > -12.0:
+		if absf(delta.y) > absf(delta.x) * 1.1 and delta.x > -18.0:
 			return
 		_start_part_drag(_press_part_id)
 	if _dragging_part:
@@ -1081,6 +1347,18 @@ func _finish_part_drag(global_pos: Vector2) -> void:
 
 
 func _slot_under_pointer(global_pos: Vector2) -> String:
+	if USE_IMAGE_BOARD:
+		for slot_id in _bay_buttons.keys():
+			var btn: Control = _bay_buttons[slot_id]
+			if btn != null and is_instance_valid(btn) and btn.get_global_rect().has_point(global_pos):
+				return str(slot_id)
+		# Prefer home bay when dropping near the board.
+		if _case_board != null and _case_board.get_global_rect().has_point(global_pos):
+			var part_id: String = _drag_part_id if _drag_part_id != "" else selected_part_id
+			var home_id: String = str(PART_HOME.get(part_id, ""))
+			if home_id != "" and _bay_buttons.has(home_id):
+				return home_id
+		return ""
 	if _viewport_container == null or _subviewport == null or _camera == null:
 		return ""
 	var rect := _viewport_container.get_global_rect()
@@ -1190,7 +1468,7 @@ func _rank_slots_on_screen(global_pos: Vector2, rect: Rect2) -> Dictionary:
 
 
 func _on_viewport_gui_input(event: InputEvent) -> void:
-	if _dragging_part:
+	if _interaction_locked or _dragging_part:
 		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT or event.button_index == MOUSE_BUTTON_MIDDLE:

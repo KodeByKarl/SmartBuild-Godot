@@ -6,6 +6,12 @@ extends Control
 signal action_submitted(action: SimulationAction)
 
 const ROOT_CAUSE := "dust_thermal"
+const TICKET_ID := "4821"
+const OFFICE_IP := "192.168.1.50"
+const OFFICE_MASK := "255.255.255.0"
+const OFFICE_GW := "192.168.1.1"
+const OFFICE_DNS := "8.8.8.8"
+const PING_EXT := "8.8.8.8"
 
 const DISK_TOTAL_GB := 256.0
 const DISK_FREE_BEFORE_GB := 12.0
@@ -59,6 +65,26 @@ var _window_panels: Dictionary = {}
 var _window_scrolls: Dictionary = {}
 var _active_window: String = ""
 var _coach_panel: PanelContainer = null
+var _alert_panel: PanelContainer = null
+var _alert_col: VBoxContainer = null
+var _esd_check: CheckBox = null
+var _case_closed: Control = null
+var _case_open: Control = null
+var _dust_overlay: ColorRect = null
+var _nic_check: CheckBox = null
+var _cable_status: Label = null
+var _link_light: ColorRect = null
+var _ip_edit: LineEdit = null
+var _mask_edit: LineEdit = null
+var _gw_edit: LineEdit = null
+var _dns_edit: LineEdit = null
+var _ping_edit: LineEdit = null
+var _ping_out: RichTextLabel = null
+var _ticket_no_edit: LineEdit = null
+var _report_edit: TextEdit = null
+var _pinged_gw: bool = false
+var _pinged_ext: bool = false
+var _dust_hits: int = 0
 
 
 func _ready() -> void:
@@ -78,6 +104,7 @@ func _ready() -> void:
 	_refresh_all()
 	_open_window("ticket")
 	_refresh_status("Open a desktop icon, then run the matching Windows tool for this service visit.")
+	_refresh_alerts()
 
 
 func setup(completed: Array = [], hints: bool = true) -> void:
@@ -88,8 +115,48 @@ func setup(completed: Array = [], hints: bool = true) -> void:
 	_preload_completed(completed)
 	_refresh_all()
 	_refresh_hints()
+	_refresh_alerts()
 	if _hint_target != "":
 		_scroll_to_step(_hint_target)
+
+
+func reset_scenario() -> void:
+	_done.clear()
+	_found.clear()
+	_root_choice = ""
+	_disk_free_gb = DISK_FREE_BEFORE_GB
+	_disk_cleaned = false
+	_pinged_gw = false
+	_pinged_ext = false
+	_dust_hits = 0
+	if _esd_check != null:
+		_esd_check.button_pressed = false
+	if _nic_check != null:
+		_nic_check.button_pressed = false
+	if _ip_edit != null:
+		_ip_edit.text = "10.255.0.1"
+		_mask_edit.text = "255.0.0.0"
+		_gw_edit.text = "10.0.0.1"
+		_dns_edit.text = "1.1.1.1"
+	if _ping_edit != null:
+		_ping_edit.text = ""
+	if _ping_out != null:
+		_ping_out.text = "Ready."
+	if _ticket_no_edit != null:
+		_ticket_no_edit.text = ""
+	if _report_edit != null:
+		_report_edit.text = ""
+	if _chk_temp != null:
+		_chk_temp.button_pressed = true
+	if _chk_recycle != null:
+		_chk_recycle.button_pressed = false
+	if _chk_downloads != null:
+		_chk_downloads.button_pressed = false
+	_sync_hardware_visual()
+	_refresh_all()
+	_refresh_alerts()
+	_open_window("ticket")
+	_refresh_status("Scenario reset — start the service visit again.")
 
 
 func _preload_completed(completed: Array) -> void:
@@ -97,7 +164,7 @@ func _preload_completed(completed: Array) -> void:
 		return
 	for id_variant in completed:
 		var step_id: String = str(id_variant)
-		if step_id == "" or not _action_buttons.has(step_id):
+		if step_id == "":
 			continue
 		_done[step_id] = true
 		_apply_findings(step_id)
@@ -105,6 +172,12 @@ func _preload_completed(completed: Array) -> void:
 			_disk_cleaned = true
 			_disk_free_gb = DISK_FREE_AFTER_GB
 			_refresh_disk_panel()
+		if step_id == "ping_path":
+			_pinged_gw = true
+			_pinged_ext = true
+		if step_id == "dust_out":
+			_dust_hits = 2
+	_sync_hardware_visual()
 	if _done.is_empty():
 		return
 	_log_line("Earlier phases of this service visit restored.")
@@ -209,6 +282,7 @@ func _build_ui() -> void:
 	_screen.add_child(band)
 
 	_build_desktop_icons(_screen)
+	_build_alert_tray(_screen)
 
 	_windows_layer = Control.new()
 	_windows_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -241,11 +315,23 @@ func _bezel_style() -> StyleBoxFlat:
 
 
 func _build_desktop_icons(parent: Control) -> void:
+	# Scroll so Close Ticket stays reachable on short phone screens.
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	scroll.anchor_right = 0.0
+	scroll.offset_left = 6
+	scroll.offset_top = 8
+	scroll.offset_right = 124
+	scroll.offset_bottom = -44
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	scroll.z_index = 8
+	parent.add_child(scroll)
+
 	var icons := VBoxContainer.new()
-	icons.position = Vector2(16, 16)
-	icons.add_theme_constant_override("separation", 10)
-	icons.mouse_filter = Control.MOUSE_FILTER_PASS
-	parent.add_child(icons)
+	icons.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	icons.add_theme_constant_override("separation", 6)
+	scroll.add_child(icons)
 
 	icons.add_child(_desk_icon("Service Ticket", "ticket"))
 	icons.add_child(_desk_icon("Field Service", "hardware"))
@@ -259,23 +345,25 @@ func _desk_icon(label: String, win_id: String) -> Button:
 	var btn := Button.new()
 	btn.text = label
 	btn.focus_mode = Control.FOCUS_NONE
-	btn.custom_minimum_size = Vector2(108, 54)
+	btn.custom_minimum_size = Vector2(108, 44)
 	btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(1, 1, 1, 0.12)
-	style.border_color = Color(1, 1, 1, 0.35)
+	style.bg_color = Color(1, 1, 1, 0.16)
+	style.border_color = Color(1, 1, 1, 0.45)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(8)
 	style.content_margin_left = 6
 	style.content_margin_right = 6
 	style.content_margin_top = 6
 	style.content_margin_bottom = 6
+	var pressed := style.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.15, 0.42, 0.62, 0.92)
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_stylebox_override("hover", style)
-	btn.add_theme_stylebox_override("pressed", style)
-	btn.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0))
+	btn.add_theme_stylebox_override("pressed", pressed)
+	_bind_btn_colors(btn, Color(0.95, 0.98, 1.0))
 	btn.pressed.connect(func() -> void: _open_window(win_id))
 	return btn
 
@@ -306,13 +394,21 @@ func _build_taskbar(parent: Control) -> void:
 	start.pressed.connect(func() -> void: _open_window("software"))
 	row.add_child(start)
 
+	var close_ticket := Button.new()
+	close_ticket.text = "Close Ticket"
+	close_ticket.focus_mode = Control.FOCUS_NONE
+	close_ticket.custom_minimum_size = Vector2(108, 28)
+	_style_win_btn(close_ticket, true)
+	close_ticket.pressed.connect(func() -> void: _open_window("close"))
+	row.add_child(close_ticket)
+
 	_taskbar_chips = HBoxContainer.new()
 	_taskbar_chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_taskbar_chips.add_theme_constant_override("separation", 6)
 	row.add_child(_taskbar_chips)
 
 	_clock_label = Label.new()
-	_clock_label.add_theme_font_size_override("font_size", 11)
+	_clock_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	_clock_label.add_theme_color_override("font_color", Color(0.9, 0.93, 0.96))
 	_clock_label.text = "9:41 AM"
 	row.add_child(_clock_label)
@@ -323,7 +419,7 @@ func _build_coach_overlay(parent: Control) -> void:
 	_coach_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_coach_panel.anchor_right = 0.0
 	_coach_panel.anchor_top = 1.0
-	_coach_panel.offset_left = 16
+	_coach_panel.offset_left = 132
 	_coach_panel.offset_right = 420
 	_coach_panel.offset_top = -48
 	_coach_panel.offset_bottom = -8
@@ -341,7 +437,7 @@ func _build_coach_overlay(parent: Control) -> void:
 
 	_status = Label.new()
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.add_theme_font_size_override("font_size", 12)
+	_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_status.add_theme_color_override("font_color", Color(0.92, 0.96, 1.0))
 	_coach_panel.add_child(_status)
 
@@ -369,8 +465,8 @@ func _build_all_windows() -> void:
 		"Disk Cleanup: Local Disk (C:)",
 		"disk",
 		_build_disk_cleanup_panel(),
-		Vector2(0.22, 0.08),
-		Vector2(0.78, 0.88)
+		Vector2(0.26, 0.08),
+		Vector2(0.96, 0.88)
 	)
 	_window_panels["network"] = _make_window(
 		"Network & Internet",
@@ -391,8 +487,8 @@ func _make_window(
 	title: String,
 	win_id: String,
 	body: Control,
-	anchor_min: Vector2 = Vector2(0.18, 0.06),
-	anchor_max: Vector2 = Vector2(0.86, 0.9)
+	anchor_min: Vector2 = Vector2(0.24, 0.05),
+	anchor_max: Vector2 = Vector2(0.98, 0.90)
 ) -> PanelContainer:
 	var win := PanelContainer.new()
 	win.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
@@ -431,7 +527,7 @@ func _make_window(
 	var ttl := Label.new()
 	ttl.text = title
 	ttl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ttl.add_theme_font_size_override("font_size", 12)
+	ttl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	ttl.add_theme_color_override("font_color", WIN_TEXT)
 	titlebar.add_child(ttl)
 
@@ -581,17 +677,91 @@ func _build_hardware_body() -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(_win_heading("Preventive hardware maintenance"))
+	col.add_child(_win_heading("Field service — chassis"))
+	col.add_child(_win_muted("Work the PC itself: clip ESD, open the side panel, then tap the dusty parts."))
 	_hardware_label = _win_state_label()
 	col.add_child(_hardware_label)
 	_state_sections["hardware"] = col
 	col.add_child(_win_sep())
-	col.add_child(_action_btn("Wear ESD strap", "ground_up", "hardware"))
-	col.add_child(_action_btn("Open the case", "open_case_pm", "hardware"))
-	col.add_child(_action_btn("Remove dust & debris", "dust_out", "hardware"))
-	col.add_child(_action_btn("Inspect cooling fans", "check_fans", "hardware"))
-	col.add_child(_action_btn("Reseat RAM modules", "reseat_ram", "hardware"))
-	col.add_child(_action_btn("Reseat power/data cables", "check_cables_int", "hardware"))
+
+	_esd_check = CheckBox.new()
+	_esd_check.text = "Clip ESD strap to chassis"
+	_esd_check.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	_esd_check.add_theme_color_override("font_color", WIN_TEXT)
+	_esd_check.toggled.connect(func(on: bool) -> void:
+		if on:
+			_try_step("ground_up")
+		_sync_hardware_visual()
+	)
+	col.add_child(_esd_check)
+	_register_hidden_step("ground_up", "hardware", "Clip ESD strap")
+
+	var chassis := PanelContainer.new()
+	chassis.custom_minimum_size = Vector2(0, 168)
+	chassis.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cs := StyleBoxFlat.new()
+	cs.bg_color = Color(0.16, 0.18, 0.22)
+	cs.border_color = Color(0.45, 0.48, 0.52)
+	cs.set_border_width_all(2)
+	cs.set_corner_radius_all(8)
+	cs.content_margin_left = 8
+	cs.content_margin_right = 8
+	cs.content_margin_top = 8
+	cs.content_margin_bottom = 8
+	chassis.add_theme_stylebox_override("panel", cs)
+	col.add_child(chassis)
+
+	var stage := Control.new()
+	stage.custom_minimum_size = Vector2(0, 152)
+	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	chassis.add_child(stage)
+
+	_case_closed = VBoxContainer.new()
+	_case_closed.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_case_closed.add_theme_constant_override("separation", 8)
+	stage.add_child(_case_closed)
+	var closed_lbl := Label.new()
+	closed_lbl.text = "Side panel on — internals hidden"
+	closed_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	closed_lbl.add_theme_color_override("font_color", Color(0.82, 0.86, 0.9))
+	_case_closed.add_child(closed_lbl)
+	var open_btn := Button.new()
+	open_btn.text = "Remove side panel"
+	open_btn.focus_mode = Control.FOCUS_NONE
+	open_btn.custom_minimum_size = Vector2(0, 36)
+	open_btn.set_meta("base_text", "Remove side panel")
+	_style_win_btn(open_btn, true)
+	open_btn.pressed.connect(func() -> void: _try_step("open_case_pm"); _sync_hardware_visual())
+	_action_buttons["open_case_pm"] = open_btn
+	_step_group["open_case_pm"] = "hardware"
+	_case_closed.add_child(open_btn)
+
+	_case_open = Control.new()
+	_case_open.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_case_open.visible = false
+	stage.add_child(_case_open)
+
+	_dust_overlay = ColorRect.new()
+	_dust_overlay.color = Color(0.45, 0.38, 0.22, 0.55)
+	_dust_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_dust_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_case_open.add_child(_dust_overlay)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	_case_open.add_child(grid)
+	grid.add_child(_hotspot_btn("Blow dust from heatsink", "dust_heatsink"))
+	grid.add_child(_hotspot_btn("Blow dust from fans", "dust_fans"))
+	grid.add_child(_hotspot_btn("Inspect cooling fans", "check_fans"))
+	grid.add_child(_hotspot_btn("Reseat loose DIMM 2", "reseat_ram"))
+	grid.add_child(_hotspot_btn("Tug-test power/SATA", "check_cables_int"))
+	var spacer := Control.new()
+	grid.add_child(spacer)
+	_register_hidden_step("dust_out", "hardware", "Remove dust")
 	return col
 
 
@@ -631,7 +801,7 @@ func _build_software_body() -> VBoxContainer:
 	_log.scroll_active = true
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 72)
-	_log.add_theme_font_size_override("normal_font_size", 11)
+	_log.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
 	_log.add_theme_color_override("default_color", Color(0.15, 0.45, 0.2))
 	_log.text = "Service log ready."
 	col.add_child(_log)
@@ -652,7 +822,7 @@ func _tools_row(tool_name: String, action_label: String, step_id: String) -> HBo
 	var name_lbl := Label.new()
 	name_lbl.text = tool_name
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.add_theme_font_size_override("font_size", 12)
+	name_lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	name_lbl.add_theme_color_override("font_color", WIN_TEXT)
 	row.add_child(name_lbl)
 
@@ -678,7 +848,7 @@ func _build_disk_cleanup_panel() -> VBoxContainer:
 	col.add_child(_win_muted("Files to delete from Local Disk (C:)"))
 
 	_disk_usage_label = Label.new()
-	_disk_usage_label.add_theme_font_size_override("font_size", 12)
+	_disk_usage_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_disk_usage_label.add_theme_color_override("font_color", WIN_TEXT)
 	col.add_child(_disk_usage_label)
 
@@ -693,19 +863,19 @@ func _build_disk_cleanup_panel() -> VBoxContainer:
 	_chk_temp = CheckBox.new()
 	_chk_temp.text = "Temporary files (18.4 GB)"
 	_chk_temp.button_pressed = true
-	_chk_temp.add_theme_font_size_override("font_size", 12)
+	_chk_temp.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_chk_temp.add_theme_color_override("font_color", WIN_TEXT)
 	col.add_child(_chk_temp)
 
 	_chk_recycle = CheckBox.new()
 	_chk_recycle.text = "Recycle Bin (2.1 GB)"
-	_chk_recycle.add_theme_font_size_override("font_size", 12)
+	_chk_recycle.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_chk_recycle.add_theme_color_override("font_color", WIN_TEXT)
 	col.add_child(_chk_recycle)
 
 	_chk_downloads = CheckBox.new()
 	_chk_downloads.text = "Downloads (6.2 GB)"
-	_chk_downloads.add_theme_font_size_override("font_size", 12)
+	_chk_downloads.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	_chk_downloads.add_theme_color_override("font_color", WIN_TEXT)
 	col.add_child(_chk_downloads)
 
@@ -726,7 +896,7 @@ func _build_disk_cleanup_panel() -> VBoxContainer:
 	run_btn.text = "OK"
 	run_btn.focus_mode = Control.FOCUS_NONE
 	run_btn.custom_minimum_size = Vector2(88, 30)
-	run_btn.add_theme_font_size_override("font_size", 12)
+	run_btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	run_btn.set_meta("base_text", "OK — Run Disk Cleanup")
 	run_btn.pressed.connect(_run_disk_cleanup)
 	_style_win_primary(run_btn)
@@ -742,16 +912,126 @@ func _build_network_body() -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(_win_heading("Network status"))
+	col.add_child(_win_heading("Network & Internet"))
+	col.add_child(_win_muted("Fix the adapter, swap the cable, set addressing, then ping."))
 	_network_label = _win_state_label()
 	col.add_child(_network_label)
 	_state_sections["network"] = col
 	col.add_child(_win_sep())
-	col.add_child(_action_btn("Enable network adapter", "check_nic", "network"))
-	col.add_child(_action_btn("Inspect / swap patch cable", "swap_patch", "network"))
-	col.add_child(_action_btn("Check switch link light", "check_switch_port", "network"))
-	col.add_child(_action_btn("Verify IP, gateway, DNS", "verify_ip", "network"))
-	col.add_child(_action_btn("Ping gateway then external", "ping_path", "network"))
+
+	_nic_check = CheckBox.new()
+	_nic_check.text = "Enable Ethernet adapter (currently disabled)"
+	_nic_check.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	_nic_check.add_theme_color_override("font_color", WIN_TEXT)
+	_nic_check.toggled.connect(func(on: bool) -> void:
+		if on:
+			_try_step("check_nic")
+			_nic_check.text = "Ethernet adapter enabled"
+		_refresh_alerts()
+	)
+	col.add_child(_nic_check)
+	_register_hidden_step("check_nic", "network", "Enable adapter")
+
+	var cable_row := HBoxContainer.new()
+	cable_row.add_theme_constant_override("separation", 8)
+	col.add_child(cable_row)
+	_cable_status = Label.new()
+	_cable_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_cable_status.text = "Patch cable: broken latch · no link"
+	_cable_status.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	_cable_status.add_theme_color_override("font_color", Color(0.7, 0.15, 0.12))
+	cable_row.add_child(_cable_status)
+	var swap := Button.new()
+	swap.text = "Swap cable"
+	swap.focus_mode = Control.FOCUS_NONE
+	swap.custom_minimum_size = Vector2(110, 30)
+	swap.set_meta("base_text", "Swap cable")
+	_style_win_btn(swap, true)
+	swap.pressed.connect(_swap_patch_cable)
+	_action_buttons["swap_patch"] = swap
+	_step_group["swap_patch"] = "network"
+	cable_row.add_child(swap)
+
+	var link_row := HBoxContainer.new()
+	link_row.add_theme_constant_override("separation", 8)
+	col.add_child(link_row)
+	_link_light = ColorRect.new()
+	_link_light.custom_minimum_size = Vector2(18, 18)
+	_link_light.color = Color(0.55, 0.12, 0.1)
+	link_row.add_child(_link_light)
+	var port_lbl := Label.new()
+	port_lbl.text = "Switch port link light"
+	port_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	port_lbl.add_theme_color_override("font_color", WIN_TEXT)
+	link_row.add_child(port_lbl)
+	var port_btn := Button.new()
+	port_btn.text = "Move port"
+	port_btn.focus_mode = Control.FOCUS_NONE
+	port_btn.custom_minimum_size = Vector2(110, 30)
+	port_btn.set_meta("base_text", "Move port")
+	_style_win_btn(port_btn, false)
+	port_btn.pressed.connect(func() -> void: _try_step("check_switch_port"); _refresh_network_visual())
+	_action_buttons["check_switch_port"] = port_btn
+	_step_group["check_switch_port"] = "network"
+	link_row.add_child(port_btn)
+
+	col.add_child(_win_sep())
+	col.add_child(_win_muted("IPv4 — type the office plan, or renew DHCP"))
+	_ip_edit = _net_field("IP address", "10.255.0.1")
+	_mask_edit = _net_field("Subnet mask", "255.0.0.0")
+	_gw_edit = _net_field("Default gateway", "10.0.0.1")
+	_dns_edit = _net_field("Preferred DNS", "1.1.1.1")
+	col.add_child(_labeled_net("IP address", _ip_edit))
+	col.add_child(_labeled_net("Subnet mask", _mask_edit))
+	col.add_child(_labeled_net("Default gateway", _gw_edit))
+	col.add_child(_labeled_net("Preferred DNS", _dns_edit))
+
+	var ip_row := HBoxContainer.new()
+	ip_row.alignment = BoxContainer.ALIGNMENT_END
+	ip_row.add_theme_constant_override("separation", 8)
+	col.add_child(ip_row)
+	var dhcp := Button.new()
+	dhcp.text = "Renew DHCP"
+	dhcp.focus_mode = Control.FOCUS_NONE
+	dhcp.custom_minimum_size = Vector2(120, 30)
+	_style_win_btn(dhcp, false)
+	dhcp.pressed.connect(_renew_dhcp)
+	ip_row.add_child(dhcp)
+	var apply_ip := Button.new()
+	apply_ip.text = "Apply"
+	apply_ip.focus_mode = Control.FOCUS_NONE
+	apply_ip.custom_minimum_size = Vector2(88, 30)
+	apply_ip.set_meta("base_text", "Apply")
+	_style_win_btn(apply_ip, true)
+	apply_ip.pressed.connect(_apply_ip_settings)
+	_action_buttons["verify_ip"] = apply_ip
+	_step_group["verify_ip"] = "network"
+	ip_row.add_child(apply_ip)
+
+	col.add_child(_win_sep())
+	col.add_child(_win_muted("Ping — gateway %s then external %s" % [OFFICE_GW, PING_EXT]))
+	_ping_edit = _net_field("Ping target", "")
+	_ping_edit.placeholder_text = OFFICE_GW
+	col.add_child(_labeled_net("Ping target", _ping_edit))
+	var ping_btn := Button.new()
+	ping_btn.text = "Ping"
+	ping_btn.focus_mode = Control.FOCUS_NONE
+	ping_btn.custom_minimum_size = Vector2(0, 32)
+	ping_btn.set_meta("base_text", "Ping")
+	_style_win_btn(ping_btn, true)
+	ping_btn.pressed.connect(_run_ping)
+	_action_buttons["ping_path"] = ping_btn
+	_step_group["ping_path"] = "network"
+	col.add_child(ping_btn)
+	_ping_out = RichTextLabel.new()
+	_ping_out.bbcode_enabled = true
+	_ping_out.fit_content = true
+	_ping_out.scroll_active = false
+	_ping_out.custom_minimum_size = Vector2(0, 48)
+	_ping_out.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(11))
+	_ping_out.add_theme_color_override("default_color", WIN_TEXT)
+	_ping_out.text = "Ready."
+	col.add_child(_ping_out)
 	return col
 
 
@@ -760,16 +1040,38 @@ func _build_close_body() -> VBoxContainer:
 	col.add_theme_constant_override("separation", 8)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(_win_heading("Service report"))
-	col.add_child(_win_muted("Confirm root cause, retest, and close the ticket."))
+	col.add_child(_win_muted("Confirm the root cause, retest, then type the ticket id and write-up."))
 	col.add_child(_win_sep())
 	col.add_child(_win_muted("Root cause"))
 	_root_option = _root_cause_option()
 	col.add_child(_root_option)
 	col.add_child(_action_btn("Confirm root cause", "pick_root", "close"))
 	col.add_child(_action_btn("Apply corrective action", "apply_fix", "close"))
-	col.add_child(_action_btn("Retest performance", "retest_perf", "close"))
-	col.add_child(_action_btn("Retest internet", "retest_net", "close"))
-	col.add_child(_action_btn("Write service report", "write_report", "close"))
+	col.add_child(_action_btn("Run performance retest", "retest_perf", "close"))
+	col.add_child(_action_btn("Run internet retest", "retest_net", "close"))
+	col.add_child(_win_sep())
+	col.add_child(_win_muted("Type ticket number exactly, then the report (must mention dust and the cleanup)."))
+	_ticket_no_edit = LineEdit.new()
+	_ticket_no_edit.placeholder_text = "Ticket number — %s" % TICKET_ID
+	_ticket_no_edit.custom_minimum_size = Vector2(0, 32)
+	_ticket_no_edit.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
+	col.add_child(_ticket_no_edit)
+	_report_edit = TextEdit.new()
+	_report_edit.placeholder_text = "Symptoms, cause, fix, parts used, time…"
+	_report_edit.custom_minimum_size = Vector2(0, 88)
+	_report_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_report_edit.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	col.add_child(_report_edit)
+	var submit := Button.new()
+	submit.text = "Submit service report"
+	submit.focus_mode = Control.FOCUS_NONE
+	submit.custom_minimum_size = Vector2(0, 36)
+	submit.set_meta("base_text", "Submit service report")
+	submit.pressed.connect(_submit_service_report)
+	_style_win_btn(submit, true)
+	_action_buttons["write_report"] = submit
+	_step_group["write_report"] = "close"
+	col.add_child(submit)
 	_state_sections["close"] = col
 	return col
 
@@ -780,7 +1082,7 @@ func _build_close_body() -> VBoxContainer:
 func _win_heading(text: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))
 	lbl.add_theme_color_override("font_color", WIN_TEXT)
 	return lbl
 
@@ -788,7 +1090,7 @@ func _win_heading(text: String) -> Label:
 func _win_muted(text: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	lbl.add_theme_color_override("font_color", WIN_MUTED)
 	return lbl
 
@@ -796,7 +1098,7 @@ func _win_muted(text: String) -> Label:
 func _win_state_label() -> Label:
 	var lbl := Label.new()
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl.add_theme_font_size_override("font_size", 12)
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	lbl.add_theme_constant_override("line_spacing", 2)
 	lbl.add_theme_color_override("font_color", WIN_TEXT)
 	return lbl
@@ -812,23 +1114,30 @@ func _win_sep() -> ColorRect:
 
 func _style_win_btn(btn: Button, accent: bool) -> void:
 	var style := StyleBoxFlat.new()
+	var fg := Color.WHITE
 	if accent:
 		style.bg_color = WIN_ACCENT
-		btn.add_theme_color_override("font_color", Color.WHITE)
+		fg = Color.WHITE
 	else:
 		style.bg_color = Color(0.94, 0.94, 0.96)
 		style.border_color = WIN_BORDER
 		style.set_border_width_all(1)
-		btn.add_theme_color_override("font_color", WIN_TEXT)
+		fg = WIN_TEXT
 	style.set_corner_radius_all(4)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	style.content_margin_top = 4
 	style.content_margin_bottom = 4
+	var pressed := style.duplicate() as StyleBoxFlat
+	if accent:
+		pressed.bg_color = Color(0.0, 0.32, 0.62)
+	else:
+		pressed.bg_color = Color(0.82, 0.84, 0.88)
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_stylebox_override("hover", style)
-	btn.add_theme_stylebox_override("pressed", style)
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
+	_bind_btn_colors(btn, fg)
 
 
 func _style_win_primary(btn: Button) -> void:
@@ -842,7 +1151,7 @@ func _action_btn(text: String, step_id: String, group: String) -> Button:
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	btn.custom_minimum_size = Vector2(0, 32)
-	btn.add_theme_font_size_override("font_size", 12)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	btn.set_meta("base_text", text)
 	btn.pressed.connect(func() -> void: _perform(step_id))
 	_style_action_btn(btn, false)
@@ -875,9 +1184,15 @@ func _style_action_btn(btn: Button, done: bool, is_next: bool = false) -> void:
 	style.content_margin_top = 6
 	style.content_margin_bottom = 6
 	btn.add_theme_stylebox_override("normal", style)
-	btn.add_theme_stylebox_override("hover", style)
-	btn.add_theme_stylebox_override("pressed", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = style.bg_color.lightened(0.06)
+	var pressed := style.duplicate() as StyleBoxFlat
+	pressed.bg_color = style.bg_color.darkened(0.12)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", pressed)
 	btn.add_theme_stylebox_override("disabled", style)
+	var fg := Color(0.12, 0.35, 0.2) if done else (Color(0.35, 0.22, 0.05) if is_next else WIN_TEXT)
+	_bind_btn_colors(btn, fg)
 	var base: String = str(btn.get_meta("base_text", btn.text))
 	btn.text = ("✓ %s" % base) if done else base
 
@@ -887,7 +1202,7 @@ func _root_cause_option() -> OptionButton:
 	opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	opt.custom_minimum_size = Vector2(0, 32)
 	opt.clip_text = true
-	opt.add_theme_font_size_override("font_size", 12)
+	opt.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	var entries: Array = [
 		["Dust / thermal throttling", "dust_thermal"],
 		["Loose RAM module", "loose_ram"],
@@ -931,6 +1246,10 @@ func _run_disk_cleanup() -> void:
 	if _chk_temp == null or not _chk_temp.button_pressed:
 		_log_line("[color=#b86]Select at least Temporary files before running cleanup.[/color]")
 		_refresh_status("Check Temporary files — that is where most of the reclaimed space lives.")
+		return
+	if not guided_hints and (_chk_recycle == null or not _chk_recycle.button_pressed):
+		_log_line("[color=#b86]Action Center: Recycle Bin still holds 2.1 GB.[/color]")
+		_refresh_status("Empty the Recycle Bin too — it is one of the storage warnings.")
 		return
 	var blocked: String = _blocked_reason("disk_cleanup")
 	if blocked != "":
@@ -1161,6 +1480,9 @@ func _refresh_all() -> void:
 
 	_refresh_disk_panel()
 	_refresh_action_states()
+	_sync_hardware_visual()
+	_refresh_network_visual()
+	_refresh_alerts()
 
 
 func _state_line(label: String, step_id: String) -> String:
@@ -1218,3 +1540,334 @@ func _log_line(line: String) -> void:
 	if _log == null:
 		return
 	_log.text = str(_log.text) + "\n" + line
+
+
+func _bind_btn_colors(btn: Button, fg: Color) -> void:
+	btn.add_theme_color_override("font_color", fg)
+	btn.add_theme_color_override("font_hover_color", fg)
+	btn.add_theme_color_override("font_pressed_color", fg)
+	btn.add_theme_color_override("font_focus_color", fg)
+	btn.add_theme_color_override("font_disabled_color", Color(fg.r, fg.g, fg.b, 0.55))
+
+
+func _register_hidden_step(step_id: String, group: String, label: String) -> void:
+	var btn := Button.new()
+	btn.visible = false
+	btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.set_meta("base_text", label)
+	_action_buttons[step_id] = btn
+	_step_group[step_id] = group
+	add_child(btn)
+
+
+func _try_step(step_id: String) -> void:
+	if _done.has(step_id):
+		return
+	_perform(step_id)
+
+
+func _hotspot_btn(text: String, kind: String) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	btn.custom_minimum_size = Vector2(0, 36)
+	btn.set_meta("base_text", text)
+	_style_win_btn(btn, false)
+	btn.pressed.connect(func() -> void: _on_hotspot(kind))
+	if kind == "check_fans" or kind == "reseat_ram" or kind == "check_cables_int":
+		_action_buttons[kind] = btn
+		_step_group[kind] = "hardware"
+	return btn
+
+
+func _on_hotspot(kind: String) -> void:
+	if kind == "dust_heatsink" or kind == "dust_fans":
+		var blocked: String = _blocked_reason("dust_out")
+		if blocked != "":
+			_refresh_status(blocked)
+			return
+		_dust_hits += 1
+		_sync_hardware_visual()
+		if _dust_hits >= 2:
+			_try_step("dust_out")
+		else:
+			_refresh_status("Dust remaining — clean the other area too.")
+		return
+	_try_step(kind)
+
+
+func _sync_hardware_visual() -> void:
+	if _esd_check != null and _done.has("ground_up"):
+		_esd_check.set_pressed_no_signal(true)
+	var opened: bool = _done.has("open_case_pm")
+	if _case_closed != null:
+		_case_closed.visible = not opened
+	if _case_open != null:
+		_case_open.visible = opened
+	if _dust_overlay != null:
+		if _done.has("dust_out"):
+			_dust_overlay.visible = false
+		else:
+			_dust_overlay.visible = opened
+			var remaining: float = clampf(0.55 - float(_dust_hits) * 0.22, 0.12, 0.55)
+			_dust_overlay.color = Color(0.45, 0.38, 0.22, remaining)
+
+
+func _net_field(placeholder: String, default_text: String) -> LineEdit:
+	var edit := LineEdit.new()
+	edit.placeholder_text = placeholder
+	edit.text = default_text
+	edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	edit.custom_minimum_size = Vector2(0, 30)
+	edit.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	return edit
+
+
+func _labeled_net(caption: String, edit: LineEdit) -> VBoxContainer:
+	var wrap := VBoxContainer.new()
+	wrap.add_theme_constant_override("separation", 2)
+	wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var lbl := Label.new()
+	lbl.text = caption
+	lbl.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
+	lbl.add_theme_color_override("font_color", WIN_MUTED)
+	wrap.add_child(lbl)
+	wrap.add_child(edit)
+	return wrap
+
+
+func _swap_patch_cable() -> void:
+	_try_step("swap_patch")
+	_refresh_network_visual()
+
+
+func _renew_dhcp() -> void:
+	if _ip_edit == null:
+		return
+	_ip_edit.text = OFFICE_IP
+	_mask_edit.text = OFFICE_MASK
+	_gw_edit.text = OFFICE_GW
+	_dns_edit.text = OFFICE_DNS
+	_apply_ip_settings()
+
+
+func _apply_ip_settings() -> void:
+	if _ip_edit == null:
+		return
+	var ip: String = _ip_edit.text.strip_edges()
+	var mask: String = _mask_edit.text.strip_edges()
+	var gw: String = _gw_edit.text.strip_edges()
+	var dns: String = _dns_edit.text.strip_edges()
+	var ok: bool = ip == OFFICE_IP and mask == OFFICE_MASK and gw == OFFICE_GW and dns == OFFICE_DNS
+	if not ok:
+		_log_line("[color=#b86]Static IP rejected — does not match the office network.[/color]")
+		_refresh_status("Office plan is %s / %s / gw %s / dns %s — or tap Renew DHCP." % [OFFICE_IP, OFFICE_MASK, OFFICE_GW, OFFICE_DNS])
+		return
+	_try_step("verify_ip")
+
+
+func _run_ping() -> void:
+	var blocked: String = _blocked_reason("ping_path")
+	if blocked != "":
+		_refresh_status(blocked)
+		if _ping_out != null:
+			_ping_out.text = "[color=#a22]%s[/color]" % blocked
+		return
+	if _ping_edit == null:
+		return
+	var target: String = _ping_edit.text.strip_edges()
+	if target == OFFICE_GW:
+		_pinged_gw = true
+		_ping_out.text = "[color=#185]Reply from %s: bytes=32 time=1ms TTL=64[/color]" % OFFICE_GW
+		if not _pinged_ext:
+			_refresh_status("Gateway reachable. Now ping %s." % PING_EXT)
+	elif target == PING_EXT:
+		_pinged_ext = true
+		_ping_out.text = "[color=#185]Reply from %s: bytes=32 time=18ms TTL=117[/color]" % PING_EXT
+	else:
+		_ping_out.text = "[color=#a22]Request timed out.[/color]"
+		_refresh_status("Ping the gateway %s first, then %s." % [OFFICE_GW, PING_EXT])
+		return
+	if _pinged_gw and _pinged_ext:
+		_try_step("ping_path")
+
+
+func _refresh_network_visual() -> void:
+	if _nic_check != null:
+		_nic_check.set_pressed_no_signal(_done.has("check_nic"))
+		_nic_check.text = (
+			"Ethernet adapter enabled"
+			if _done.has("check_nic")
+			else "Enable Ethernet adapter (currently disabled)"
+		)
+	if _cable_status != null:
+		if _done.has("swap_patch"):
+			_cable_status.text = "Patch cable: replaced · latch OK"
+			_cable_status.add_theme_color_override("font_color", Color(0.12, 0.45, 0.22))
+		else:
+			_cable_status.text = "Patch cable: broken latch · no link"
+			_cable_status.add_theme_color_override("font_color", Color(0.7, 0.15, 0.12))
+	if _link_light != null:
+		var linked: bool = _done.has("check_switch_port") or _done.has("swap_patch")
+		_link_light.color = Color(0.15, 0.75, 0.28) if linked else Color(0.55, 0.12, 0.1)
+
+
+func _submit_service_report() -> void:
+	var blocked: String = _blocked_reason("write_report")
+	if blocked != "":
+		_refresh_status(blocked)
+		return
+	var ticket := ""
+	if _ticket_no_edit != null:
+		ticket = _ticket_no_edit.text.strip_edges()
+	if ticket != TICKET_ID:
+		_refresh_status("Type the ticket number exactly: %s" % TICKET_ID)
+		return
+	var body := ""
+	if _report_edit != null:
+		body = _report_edit.text.to_lower()
+	if body.find("dust") < 0 or (body.find("clean") < 0 and body.find("thermal") < 0):
+		_refresh_status("Write the report: mention dust and the cleanup / thermal fix.")
+		return
+	_try_step("write_report")
+
+
+func _build_alert_tray(parent: Control) -> void:
+	_alert_panel = PanelContainer.new()
+	_alert_panel.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	_alert_panel.anchor_left = 1.0
+	_alert_panel.offset_left = -208
+	_alert_panel.offset_right = -6
+	_alert_panel.offset_top = 8
+	_alert_panel.offset_bottom = -44
+	_alert_panel.visible = false
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.12, 0.14, 0.18, 0.94)
+	style.border_color = Color(0.95, 0.7, 0.25, 0.7)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(10)
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	_alert_panel.add_theme_stylebox_override("panel", style)
+	_alert_panel.z_index = 40
+	parent.add_child(_alert_panel)
+
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_alert_panel.add_child(col)
+
+	var hdr := Label.new()
+	hdr.text = "Action Center"
+	hdr.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	hdr.add_theme_color_override("font_color", Color(1.0, 0.82, 0.4))
+	col.add_child(hdr)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	col.add_child(scroll)
+	_alert_col = VBoxContainer.new()
+	_alert_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_alert_col.add_theme_constant_override("separation", 6)
+	scroll.add_child(_alert_col)
+
+
+func _refresh_alerts() -> void:
+	if _alert_panel == null or _alert_col == null:
+		return
+	_alert_panel.visible = not guided_hints
+	if guided_hints:
+		return
+	for child in _alert_col.get_children():
+		child.queue_free()
+	var items: Array = _open_alerts()
+	if items.is_empty():
+		_alert_col.add_child(_alert_card("All clear", "No open warnings on this workstation.", "", false))
+		return
+	for item in items:
+		var entry: Dictionary = item
+		_alert_col.add_child(_alert_card(str(entry.get("title", "")), str(entry.get("body", "")), str(entry.get("win", "")), true))
+
+
+func _open_alerts() -> Array:
+	var out: Array = []
+	if not _disk_cleaned:
+		out.append({
+			"title": "Storage almost full",
+			"body": "C: has %.0f GB free. Empty Recycle Bin and run Disk Cleanup." % _disk_free_gb,
+			"win": "disk"
+		})
+	if not _done.has("malware_scan"):
+		out.append({
+			"title": "Threat detected",
+			"body": "Windows Security has not scanned this PC yet.",
+			"win": "software"
+		})
+	if not _done.has("check_nic"):
+		out.append({
+			"title": "No internet",
+			"body": "Ethernet adapter is disabled.",
+			"win": "network"
+		})
+	if not _done.has("swap_patch"):
+		out.append({
+			"title": "Unstable link",
+			"body": "Patch cable latch is broken — swap the cable.",
+			"win": "network"
+		})
+	if not _done.has("verify_ip"):
+		out.append({
+			"title": "Bad IP config",
+			"body": "Static address does not match the office plan.",
+			"win": "network"
+		})
+	if not _done.has("dust_out"):
+		out.append({
+			"title": "Overheating",
+			"body": "Heatsink and fans are packed with dust.",
+			"win": "hardware"
+		})
+	if not _done.has("reseat_ram"):
+		out.append({
+			"title": "Memory warning",
+			"body": "DIMM 2 is not fully seated.",
+			"win": "hardware"
+		})
+	return out
+
+
+func _alert_card(title: String, body: String, win_id: String, warn: bool) -> Button:
+	var btn := Button.new()
+	btn.text = "%s\n%s" % [title, body]
+	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.custom_minimum_size = Vector2(0, 58)
+	var style := StyleBoxFlat.new()
+	if warn:
+		style.bg_color = Color(0.28, 0.16, 0.06, 0.96)
+		style.border_color = Color(0.95, 0.65, 0.2, 0.8)
+	else:
+		style.bg_color = Color(0.08, 0.22, 0.16, 0.96)
+		style.border_color = Color(0.35, 0.75, 0.5, 0.6)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	var pressed := style.duplicate() as StyleBoxFlat
+	pressed.bg_color = style.bg_color.lightened(0.08)
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_stylebox_override("hover", style)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	_bind_btn_colors(btn, Color(0.98, 0.95, 0.88) if warn else Color(0.86, 0.96, 0.9))
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(10))
+	if win_id != "":
+		btn.pressed.connect(func() -> void: _open_window(win_id))
+	return btn

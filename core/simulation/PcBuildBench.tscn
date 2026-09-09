@@ -86,7 +86,7 @@ layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.75, 0.9, 0.98, 0.95)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "Drag a part from the right onto its bay. Tap a seated part to remove it."
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -112,13 +112,13 @@ theme_override_constants/separation = 6
 [node name="TrayTitle" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.88, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 15
 text = "PARTS · drag onto the case"
 
 [node name="SelectedLabel" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.9)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 text = "Drag a part into its bay"
 autowrap_mode = 3
 

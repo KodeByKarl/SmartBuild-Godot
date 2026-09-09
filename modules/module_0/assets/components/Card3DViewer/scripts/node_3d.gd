@@ -16,8 +16,6 @@ var previous_center := Vector2.ZERO
 var is_rotating := false
 var is_panning := false
 var interactive := true
-var auto_rotate := true
-var auto_rotate_speed := 0.55
 
 var last_mouse_position := Vector2.ZERO
 var _view_hint := ""
@@ -33,12 +31,6 @@ func setup(rs: float, zs: float, ps: float) -> void:
 
 func set_interactive(enabled: bool) -> void:
 	interactive = enabled
-	set_process(enabled and auto_rotate)
-
-
-func set_auto_rotate(enabled: bool) -> void:
-	auto_rotate = enabled
-	set_process(interactive and auto_rotate)
 
 
 func _ready() -> void:
@@ -46,17 +38,9 @@ func _ready() -> void:
 	setting_model()
 	# Orbit is driven by SubViewportContainer.gui_input (card_3d_viewer.gd)
 	# so quiz/page buttons are never stolen by global input.
+	set_process(false)
 	set_process_input(false)
 	set_process_unhandled_input(false)
-	if PerformanceProfile != null:
-		auto_rotate_speed = PerformanceProfile.auto_rotate_speed * 0.65
-	set_process(interactive and auto_rotate)
-
-
-func _process(delta: float) -> void:
-	if not interactive or not auto_rotate or model_pivot == null:
-		return
-	model_pivot.rotate_y(delta * auto_rotate_speed)
 
 
 func handle_gui_input(event: InputEvent) -> void:
@@ -67,9 +51,6 @@ func handle_gui_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			is_rotating = event.pressed
 			last_mouse_position = event.position
-			if event.pressed:
-				auto_rotate = false
-				set_process(false)
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
 			is_panning = event.pressed
 			last_mouse_position = event.position
@@ -92,8 +73,6 @@ func handle_gui_input(event: InputEvent) -> void:
 	elif event is InputEventScreenTouch:
 		if event.pressed:
 			touches[event.index] = event.position
-			auto_rotate = false
-			set_process(false)
 			if touches.size() == 2:
 				previous_finger_1 = touches.values()[0]
 				previous_finger_2 = touches.values()[1]
@@ -132,8 +111,6 @@ func reset() -> void:
 	model_pivot.position = Vector3.ZERO
 	model_pivot.rotation = _base_pivot_rotation
 	_view_hint = ""
-	auto_rotate = true
-	set_process(interactive and auto_rotate)
 
 
 func setting_model(view_hint: String = "") -> void:

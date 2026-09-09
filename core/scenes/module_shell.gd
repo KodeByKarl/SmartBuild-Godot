@@ -12,23 +12,33 @@ const PARTS_SEARCH_OVERLAY := preload("res://core/ui/parts_search_overlay.gd")
 var _packed_cache: Dictionary = {}
 var _pending_preview_loads: Array = []
 var _page_turn_busy := false
+var _lab_pool: Dictionary = {}
+var _lab_holder: Control = null
 
 ## Horizontal inset applied to the whole shell column, plus room for the page scrollbar.
 const SHELL_INSET := 18.0
 const PRESENTATION_MARGINS := SHELL_INSET * 2.0
 const SCROLLBAR_ALLOWANCE := 14.0
+## Vertical inset keeps Exit and the page arrows off the phone's screen edges.
+const SHELL_INSET_TOP := 10.0
+const SHELL_INSET_BOTTOM := 16.0
+const NAV_BAR_HEIGHT := 84.0
+const NAV_BUTTON_SIZE := Vector2(64, 64)
+const EXIT_BUTTON_SIZE := Vector2(56, 56)
 
 @onready var module_label: Label = $Wrapper/Header/ModuleLabel
 @onready var phase_label: Label = $Wrapper/Header/PhaseLabel
 @onready var page_counter_label: Label = $Wrapper/Navigation/PageCounterLabel
 @onready var content: VBoxContainer = $Wrapper/Presentation/PageScroll/Content
-@onready var prev_btn: Button = $Wrapper/Navigation/Buttons/PreviousButton
-@onready var next_btn: Button = $Wrapper/Navigation/Buttons/NextButton
-@onready var exit_btn: Button = $Wrapper/Navigation/ExitButton
+@onready var prev_btn: Button = $Wrapper/Navigation/PreviousButton
+@onready var next_btn: Button = $Wrapper/Navigation/NextButton
+@onready var exit_btn: Button = $Wrapper/Header/ExitButton
 
 var module_id: int = 1
 var simulation_type: int = 0
 var progress: float = 0.0
+## Pages the learner has cleared — Next stays locked on unfinished simulations.
+var _completed_page_indexes: Dictionary = {}
 
 var module_data: Dictionary = {}
 var current_page_index: int = 0
@@ -36,6 +46,12 @@ var current_page_root: Control = null
 var _is_ready := false
 var _start_page_resolved := false
 var _path_completion_emitted := false
+## Completion is reported on the way out, not on render, so the reward page is
+## actually readable. Tracked separately so backing off the page still counts.
+var _completion_page_seen := false
+## Ignore Next for a beat after a sim finishes so the completing tap cannot
+## also press Next and skip (or bounce) the next page.
+var _nav_ignore_until_ms: int = 0
 
 var active_viewer: Control = null
 var active_viewer_container: Node3D = null
@@ -94,15 +110,25 @@ func configure(new_module_id: int, new_simulation_type: int = 0, new_progress: f
 	module_data = ModuleContentRegistry.get_module(module_id)
 	_start_page_resolved = false
 	_path_completion_emitted = false
+	_completion_page_seen = false
+	_completed_page_indexes.clear()
 	current_page_index = _resolve_start_page_index()
 	_start_page_resolved = true
+	_seed_completed_pages_up_to(current_page_index)
 
 	if _is_ready:
+		_prefetch_module_now()
 		_render_page()
 
 
 func _packed(path: String) -> PackedScene:
 	if path == "":
+		return null
+	if ResourceWarmup != null and ResourceWarmup.has_method("get_packed"):
+		var warmed: PackedScene = ResourceWarmup.get_packed(path)
+		if warmed != null:
+			_packed_cache[path] = warmed
+			return warmed
 		return null
 	if _packed_cache.has(path):
 		return _packed_cache[path] as PackedScene
@@ -114,6 +140,9 @@ func _packed(path: String) -> PackedScene:
 	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 		push_warning("ModuleShell: refusing sync load while threaded load runs: %s" % path)
 		return null
+	if path.ends_with(".gltf") or path.ends_with(".glb"):
+		_prefetch(path)
+		return null
 	var scene := load(path) as PackedScene
 	if scene != null:
 		_packed_cache[path] = scene
@@ -123,6 +152,11 @@ func _packed(path: String) -> PackedScene:
 
 
 func _take_threaded(path: String) -> PackedScene:
+	if ResourceWarmup != null and ResourceWarmup.has_method("get_packed"):
+		var warmed: PackedScene = ResourceWarmup.get_packed(path)
+		if warmed != null:
+			_packed_cache[path] = warmed
+		return warmed
 	var status := ResourceLoader.load_threaded_get_status(path)
 	if status != ResourceLoader.THREAD_LOAD_LOADED:
 		return null
@@ -135,6 +169,9 @@ func _take_threaded(path: String) -> PackedScene:
 
 func _prefetch(path: String) -> void:
 	if path == "" or _packed_cache.has(path):
+		return
+	if ResourceWarmup != null and ResourceWarmup.has_method("prefetch"):
+		ResourceWarmup.prefetch(path)
 		return
 	if not ResourceLoader.exists(path):
 		return
@@ -151,6 +188,14 @@ func _await_critical_paths(paths: PackedStringArray, timeout_ms: int = 8000) -> 
 	var deadline := Time.get_ticks_msec() + timeout_ms
 	for path in paths:
 		if path == "" or _packed_cache.has(path):
+			continue
+		if ResourceWarmup != null and ResourceWarmup.has_method("await_packed"):
+			var remaining: int = maxi(deadline - Time.get_ticks_msec(), 1)
+			var packed: PackedScene = await ResourceWarmup.await_packed(path, remaining)
+			if packed != null:
+				_packed_cache[path] = packed
+			if not is_instance_valid(self):
+				return
 			continue
 		while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			if Time.get_ticks_msec() > deadline:
@@ -200,10 +245,25 @@ func _prefetch_page_assets(page: Dictionary) -> void:
 	# Skip library item glTF prefetch — Parts Lab is procedural and loads on tap.
 
 
+func _prefetch_module_now() -> void:
+	if ResourceWarmup != null and ResourceWarmup.has_method("prefetch_module"):
+		ResourceWarmup.prefetch_module(module_id)
+	var pages: Array = module_data.get("pages", [])
+	for page_index in pages.size():
+		var page: Dictionary = pages[page_index] as Dictionary
+		for path in _paths_for_page(page):
+			_prefetch(path)
+		if page_index < 3:
+			_prefetch_page_assets(page)
+	_drain_threaded_cache()
+
+
 func _prefetch_around_current() -> void:
 	var pages: Array = module_data.get("pages", [])
-	# Include offset 0 so the current page's critical scene starts loading
-	# immediately on first render, rather than only on the next page turn.
+	# Labs for every remaining page; props only for the next couple of turns.
+	for index in range(current_page_index, pages.size()):
+		for path in _paths_for_page(pages[index] as Dictionary):
+			_prefetch(path)
 	for offset in range(0, 3):
 		var index: int = current_page_index + offset
 		if index >= 0 and index < pages.size():
@@ -219,6 +279,68 @@ func _drain_threaded_cache() -> void:
 			continue
 		for path in _paths_for_page(pages[index] as Dictionary):
 			_take_threaded(path)
+
+
+func _ensure_lab_holder() -> void:
+	if _lab_holder != null and is_instance_valid(_lab_holder):
+		return
+	_lab_holder = Control.new()
+	_lab_holder.name = "LabPrewarm"
+	_lab_holder.visible = false
+	_lab_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lab_holder.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_lab_holder.custom_minimum_size = Vector2(2, 2)
+	add_child(_lab_holder)
+
+
+func _take_or_make_lab(path: String) -> Control:
+	if path == "":
+		return null
+	if _lab_pool.has(path):
+		var pooled: Control = _lab_pool[path] as Control
+		_lab_pool.erase(path)
+		if pooled != null and is_instance_valid(pooled):
+			var parent := pooled.get_parent()
+			if parent != null:
+				parent.remove_child(pooled)
+			pooled.visible = true
+			pooled.mouse_filter = Control.MOUSE_FILTER_STOP
+			return pooled
+	var packed: PackedScene = _packed(path)
+	if packed == null:
+		return null
+	return packed.instantiate() as Control
+
+
+func _prewarm_lab(path: String) -> void:
+	if path == "" or _lab_pool.has(path):
+		return
+	var packed: PackedScene = _packed(path)
+	if packed == null:
+		_prefetch(path)
+		return
+	_ensure_lab_holder()
+	var lab: Control = packed.instantiate() as Control
+	if lab == null:
+		return
+	lab.visible = false
+	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lab_holder.add_child(lab)
+	_lab_pool[path] = lab
+
+
+func _prewarm_upcoming() -> void:
+	_prefetch_around_current()
+	var pages: Array = module_data.get("pages", [])
+	for offset in range(1, 3):
+		var index: int = current_page_index + offset
+		if index < 0 or index >= pages.size():
+			continue
+		for path in _paths_for_page(pages[index] as Dictionary):
+			if _lab_pool.has(path):
+				continue
+			_prewarm_lab(path)
+			return
 
 
 func _process(_delta: float) -> void:
@@ -254,10 +376,14 @@ func _ready() -> void:
 	if page_scroll != null:
 		page_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		page_scroll.clip_contents = true
 	var navigation := get_node_or_null("Wrapper/Navigation") as Control
 	if navigation != null:
 		navigation.size_flags_vertical = Control.SIZE_SHRINK_END
-		navigation.custom_minimum_size = Vector2(0, 72)
+		navigation.custom_minimum_size = Vector2(0, NAV_BAR_HEIGHT)
+		navigation.mouse_filter = Control.MOUSE_FILTER_STOP
+		# Keep Next/Prev above any overflowing page content.
+		navigation.z_index = 20
 	var wrapper := get_node_or_null("Wrapper") as Control
 	if wrapper != null:
 		wrapper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -265,10 +391,18 @@ func _ready() -> void:
 		# with the page cards instead of sitting flush against the window edge.
 		wrapper.offset_left = SHELL_INSET
 		wrapper.offset_right = -SHELL_INSET
+		wrapper.offset_top = SHELL_INSET_TOP
+		wrapper.offset_bottom = -SHELL_INSET_BOTTOM
 
 	prev_btn.pressed.connect(_on_prev_btn_pressed)
 	next_btn.pressed.connect(_on_next_btn_pressed)
 	exit_btn.pressed.connect(_on_exit_btn_pressed)
+	if prev_btn != null:
+		prev_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	if next_btn != null:
+		next_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	if exit_btn != null:
+		exit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := get_node_or_null("Background") as Control
 	if bg != null:
 		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -283,6 +417,12 @@ func _ready() -> void:
 
 	_apply_header_layout()
 	_style_nav_buttons()
+	_prefetch_module_now()
+	var pages: Array = module_data.get("pages", [])
+	if current_page_index >= 0 and current_page_index < pages.size():
+		await _await_critical_paths(_paths_for_page(pages[current_page_index] as Dictionary), 8000)
+	if not is_instance_valid(self):
+		return
 	_render_page()
 
 
@@ -291,9 +431,9 @@ func _apply_header_layout() -> void:
 		phase_label.visible = not _viewport_narrow()
 	if _header_search_btn != null:
 		_header_search_btn.text = "Find" if _viewport_narrow() else "Search"
-		_header_search_btn.custom_minimum_size = Vector2(56 if _viewport_narrow() else 72, 32)
+		_header_search_btn.custom_minimum_size = Vector2(68 if _viewport_narrow() else 84, 40)
 	if _header_help_btn != null:
-		_header_help_btn.custom_minimum_size = Vector2(52 if _viewport_narrow() else 72, 32)
+		_header_help_btn.custom_minimum_size = Vector2(64 if _viewport_narrow() else 84, 40)
 
 
 func _style_nav_buttons() -> void:
@@ -302,7 +442,7 @@ func _style_nav_buttons() -> void:
 	for btn in [prev_btn, next_btn, exit_btn]:
 		if btn == null:
 			continue
-		btn.custom_minimum_size = Vector2(60, 60)
+		btn.custom_minimum_size = EXIT_BUTTON_SIZE if btn == exit_btn else NAV_BUTTON_SIZE
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.focus_mode = Control.FOCUS_NONE
@@ -328,6 +468,42 @@ func _style_nav_buttons() -> void:
 		btn.add_theme_color_override("icon_normal_color", cyan)
 		btn.add_theme_color_override("icon_hover_color", white)
 		btn.add_theme_color_override("icon_disabled_color", Color(0.45, 0.6, 0.7, 0.5))
+
+
+func _style_overlay_close_button(btn: Button) -> void:
+	var cyan := Color(0.09, 0.65, 0.87, 1)
+	var white := Color(0.95, 0.98, 0.99, 1)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.04, 0.18, 0.28, 0.95)
+	normal.border_color = Color(0.35, 0.82, 0.95, 0.45)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(12)
+	normal.content_margin_left = 14
+	normal.content_margin_right = 14
+	normal.content_margin_top = 8
+	normal.content_margin_bottom = 8
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.08, 0.32, 0.45, 0.98)
+	hover.border_color = cyan
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", hover)
+	btn.add_theme_color_override("font_color", cyan)
+	btn.add_theme_color_override("font_hover_color", white)
+	btn.custom_minimum_size = Vector2(72, 36)
+
+
+func _style_simulation_progress_bar(bar: ProgressBar) -> void:
+	if bar == null:
+		return
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.09, 0.65, 0.87, 1)
+	fill.set_corner_radius_all(6)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.08, 0.12, 0.9)
+	bg.set_corner_radius_all(6)
+	bar.add_theme_stylebox_override("fill", fill)
+	bar.add_theme_stylebox_override("background", bg)
 
 
 func _notification(what: int) -> void:
@@ -429,14 +605,16 @@ func _apply_page_min_width() -> void:
 		)
 	var navigation := get_node_or_null("Wrapper/Navigation") as Control
 	if navigation != null:
-		navigation.custom_minimum_size = Vector2(0, 72)
+		navigation.custom_minimum_size = Vector2(0, NAV_BAR_HEIGHT)
 
 
 func _embedded_lab_height() -> float:
 	var vp_h := get_viewport().get_visible_rect().size.y
-	var chrome := 216.0 if _viewport_short() else 184.0
-	var floor := 340.0 if _viewport_short() else 420.0
-	return maxf(floor, vp_h - chrome)
+	var chrome := 240.0 if _viewport_short() else 208.0
+	# Keep the catalog inside the scroll area so Navigation stays tappable.
+	var available := maxf(vp_h - chrome, 280.0)
+	var floor := 300.0 if _viewport_short() else 360.0
+	return clampf(available, floor, 480.0)
 
 
 func _viewport_short() -> bool:
@@ -504,21 +682,14 @@ func _build_model_library_page(page: Dictionary) -> Control:
 	var root := _base_page()
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var packed: PackedScene = _packed(HARDWARE_LAB_PATH)
-	if packed == null and ResourceLoader.exists(HARDWARE_LAB_PATH):
-		# Safe cold path only — never sync-load while a threaded request is live.
-		if ResourceLoader.load_threaded_get_status(HARDWARE_LAB_PATH) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-			packed = load(HARDWARE_LAB_PATH) as PackedScene
-			if packed != null:
-				_packed_cache[HARDWARE_LAB_PATH] = packed
-	if packed == null:
+	active_hardware_lab = _take_or_make_lab(HARDWARE_LAB_PATH)
+	if active_hardware_lab == null:
 		# Await timed out; retry once the background load finishes.
 		call_deferred("_retry_current_page_soon")
 		return _build_empty_state(
 			"Loading Parts Lab…",
 			"Warming up the hardware viewer. This page will refresh automatically."
 		)
-	active_hardware_lab = packed.instantiate() as Control
 	active_hardware_lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	active_hardware_lab.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	# Clear full-rect anchors so the VBox/ScrollContainer can assign real height.
@@ -542,13 +713,11 @@ func _build_model_library_page(page: Dictionary) -> Control:
 
 
 func _retry_current_page_soon() -> void:
-	await get_tree().create_timer(0.35).timeout
+	await get_tree().create_timer(0.2).timeout
 	if not is_instance_valid(self) or _page_turn_busy:
 		return
 	var pages: Array = module_data.get("pages", [])
 	if current_page_index < 0 or current_page_index >= pages.size():
-		return
-	if str(pages[current_page_index].get("type", "")) != "model_library":
 		return
 	await _await_critical_paths(_paths_for_page(pages[current_page_index] as Dictionary), 6000)
 	if not is_instance_valid(self) or _page_turn_busy:
@@ -558,12 +727,52 @@ func _retry_current_page_soon() -> void:
 
 func _resolve_start_page_index() -> int:
 	# Shared by Modules 1–4.
-	# simulationType 0 = Guided (yellow hints on guided_simulation pages)
-	# simulationType 1 = Assessment (same page list, hints off)
-	# Both always start at page 0 — never jump to a lone assessment page.
-	if module_data.is_empty():
+	# simulationType 0 = Guided — resume at the furthest saved page so progress
+	# bars match where the learner left off (never reset to page 0).
+	# simulationType 1 = Assessment — open straight on the graded simulation.
+	var pages: Array = module_data.get("pages", [])
+	if pages.is_empty():
 		return 0
-	return 0
+	if simulation_type == 1:
+		for index in pages.size():
+			if str((pages[index] as Dictionary).get("type", "")) == "assessment":
+				return index
+		return 0
+	# progress is 0..100 from the host (page-based). Map back to an index.
+	if progress <= 0.5:
+		return 0
+	var total: int = pages.size()
+	var from_pct: int = clampi(int(ceil((progress / 100.0) * float(total))) - 1, 0, total - 1)
+	return from_pct
+
+
+func _seed_completed_pages_up_to(up_to_index: int) -> void:
+	# When resuming, earlier pages are treated as cleared so Prev/Next still work.
+	for i in range(maxi(up_to_index, 0)):
+		_completed_page_indexes[i] = true
+
+
+func _page_requires_simulation_clear(page: Dictionary) -> bool:
+	var page_type: String = str(page.get("type", ""))
+	return page_type == "guided_simulation" or page_type == "assessment"
+
+
+func _mark_current_page_complete() -> void:
+	_completed_page_indexes[current_page_index] = true
+	_update_navigation_state()
+
+
+func _can_advance_from_current_page() -> bool:
+	var pages: Array = module_data.get("pages", [])
+	if current_page_index < 0 or current_page_index >= pages.size():
+		return false
+	if current_page_index >= pages.size() - 1:
+		return false
+	if _completed_page_indexes.has(current_page_index):
+		return true
+	var page: Dictionary = pages[current_page_index] as Dictionary
+	# Reading pages (hero / catalog / bridge / completion) clear on view.
+	return not _page_requires_simulation_clear(page)
 
 
 func _render_page() -> void:
@@ -618,15 +827,18 @@ func _render_page() -> void:
 	if page_scroll != null:
 		page_scroll.scroll_vertical = 0
 		page_scroll.scroll_horizontal = 0
+	if str(page.get("type", "")) == "completion":
+		_completion_page_seen = true
+		_nav_ignore_until_ms = Time.get_ticks_msec() + 900
+	# Instruction / catalog pages are cleared once shown; sims wait for completion.
+	if not _page_requires_simulation_clear(page):
+		_mark_current_page_complete()
 	_sync_page_progress_to_host()
 	_update_navigation_state()
-	# Finishing all pages unlocks Assessment (guided) or marks 100% (assessment).
-	if str(page.get("type", "")) == "completion":
-		_emit_path_completed_once()
 	call_deferred("_apply_page_min_width")
 	call_deferred("_play_page_enter")
 	_refresh_help_context()
-	call_deferred("_prefetch_around_current")
+	call_deferred("_prewarm_upcoming")
 
 
 func _setup_header_tools() -> void:
@@ -636,7 +848,8 @@ func _setup_header_tools() -> void:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
-	header.move_child(spacer, 1)
+	# Sit right after the title so Exit stays pinned to the left edge.
+	header.move_child(spacer, module_label.get_index() + 1)
 	_header_search_btn = _header_tool_button("Search")
 	_header_search_btn.pressed.connect(_open_module_search)
 	header.add_child(_header_search_btn)
@@ -649,8 +862,8 @@ func _header_tool_button(label: String) -> Button:
 	var btn := Button.new()
 	btn.text = label
 	btn.focus_mode = Control.FOCUS_NONE
-	btn.add_theme_font_size_override("font_size", 12)
-	btn.custom_minimum_size = Vector2(72, 32)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
+	btn.custom_minimum_size = Vector2(84, 40)
 	return btn
 
 
@@ -711,16 +924,17 @@ func _open_module_help() -> void:
 
 	var top := HBoxContainer.new()
 	col.add_child(top)
-	var title := Label.new()
-	title.text = "Module Help"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 20)
-	top.add_child(title)
 	var close := Button.new()
 	close.text = "Close"
 	close.focus_mode = Control.FOCUS_NONE
 	close.pressed.connect(_close_module_help)
+	_style_overlay_close_button(close)
 	top.add_child(close)
+	var title := Label.new()
+	title.text = "Module Help"
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(20))
+	top.add_child(title)
 
 	_help_body = RichTextLabel.new()
 	_help_body.bbcode_enabled = true
@@ -770,6 +984,9 @@ func _refresh_help_context() -> void:
 
 func _clear_content() -> void:
 	_pending_preview_loads.clear()
+	if active_hardware_lab != null and is_instance_valid(active_hardware_lab):
+		if active_hardware_lab.has_method("shutdown_lab"):
+			active_hardware_lab.call("shutdown_lab")
 	for child in content.get_children():
 		child.visible = false
 		child.queue_free()
@@ -951,14 +1168,14 @@ func _build_completion_page(page: Dictionary) -> Control:
 
 	var greet := Label.new()
 	greet.text = str(page.get("title", "Congratulations!"))
-	greet.add_theme_font_size_override("font_size", 36)
+	greet.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(36))
 	greet.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0, 1))
 	greet_col.add_child(greet)
 
 	var sub := Label.new()
 	sub.text = str(page.get("subtitle", ""))
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sub.add_theme_font_size_override("font_size", 16)
+	sub.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(16))
 	sub.add_theme_color_override("font_color", Color(0.78, 0.9, 0.96, 0.92))
 	greet_col.add_child(sub)
 
@@ -973,14 +1190,14 @@ func _build_completion_page(page: Dictionary) -> Control:
 			layout.add_child(row)
 			var mark := Label.new()
 			mark.text = "✓"
-			mark.add_theme_font_size_override("font_size", 18)
+			mark.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(18))
 			mark.add_theme_color_override("font_color", Color(0.35, 0.95, 0.65, 1))
 			row.add_child(mark)
 			var text := Label.new()
 			text.text = str(item)
 			text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			text.add_theme_font_size_override("font_size", 15)
+			text.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 			text.add_theme_color_override("font_color", Color(0.9, 0.95, 0.98, 0.95))
 			row.add_child(text)
 
@@ -1041,7 +1258,7 @@ func _build_pc_build_simulation_page(page: Dictionary, is_assessment: bool) -> C
 	var built: Array = _build_workstation_page(
 		page,
 		is_assessment,
-		_packed(PC_BUILD_BENCH_PATH),
+		PC_BUILD_BENCH_PATH,
 		"Build Bench",
 		"Drag a part from the right onto its bay. Tap a seated part to remove it.",
 		build_parts
@@ -1087,7 +1304,7 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 
 	var phase_chip := Label.new()
 	phase_chip.text = str(page.get("eyebrow", "Network Workstation")).to_upper()
-	phase_chip.add_theme_font_size_override("font_size", 11)
+	phase_chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	phase_chip.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	top_row.add_child(phase_chip)
 
@@ -1097,7 +1314,7 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 
 	simulation_progress_label = Label.new()
 	simulation_progress_label.text = "Step 0 / %d" % maxi(simulation_total_steps, 1)
-	simulation_progress_label.add_theme_font_size_override("font_size", 12)
+	simulation_progress_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	simulation_progress_label.add_theme_color_override("font_color", Color(0.75, 0.88, 0.95, 0.95))
 	top_row.add_child(simulation_progress_label)
 
@@ -1107,6 +1324,7 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 	simulation_progress_bar.value = 0
 	simulation_progress_bar.show_percentage = false
 	simulation_progress_bar.custom_minimum_size = Vector2(120, 10)
+	_style_simulation_progress_bar(simulation_progress_bar)
 	top_row.add_child(simulation_progress_bar)
 
 	simulation_instruction_label = RichTextLabel.new()
@@ -1116,7 +1334,7 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 	simulation_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simulation_instruction_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	simulation_instruction_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	simulation_instruction_label.add_theme_font_size_override("normal_font_size", 13 if _viewport_short() else 14)
+	simulation_instruction_label.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(13 if _viewport_short() else 14))
 	simulation_instruction_label.custom_minimum_size = Vector2(0, 20 if _viewport_short() else 22)
 	mission_col.add_child(simulation_instruction_label)
 
@@ -1127,16 +1345,16 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 	simulation_feedback_label = Label.new()
 	simulation_feedback_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	simulation_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	simulation_feedback_label.add_theme_font_size_override("font_size", 12)
+	simulation_feedback_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	simulation_feedback_label.add_theme_color_override("font_color", Color(0.72, 0.88, 0.95, 0.9))
-	simulation_feedback_label.text = "Cable → Configure PC → Ping. Yellow highlight = next devices."
+	simulation_feedback_label.text = "Cable → Configure PC → Ping. Unlike devices = straight-through. Like devices = crossover."
 	meta_row.add_child(simulation_feedback_label)
 
 	# Tip shares the feedback row space; keep node for step updates.
 	simulation_tip_label = Label.new()
 	simulation_tip_label.visible = false
 	simulation_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	simulation_tip_label.add_theme_font_size_override("font_size", 11)
+	simulation_tip_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	simulation_tip_label.add_theme_color_override("font_color", Color(0.55, 0.82, 0.95, 0.85))
 	mission_col.add_child(simulation_tip_label)
 
@@ -1149,26 +1367,15 @@ func _build_network_lab_simulation_page(page: Dictionary, is_assessment: bool) -
 		for pitfall in page.get("pitfalls", []):
 			var chip := Label.new()
 			chip.text = "• %s" % str(pitfall)
-			chip.add_theme_font_size_override("font_size", 11)
+			chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 			chip.add_theme_color_override("font_color", Color(1.0, 0.72, 0.45, 0.95))
 			pit_row.add_child(chip)
 
-	active_network_lab = _packed(NETWORK_LAB_PATH).instantiate() as Control
-	active_network_lab.anchor_left = 0.0
-	active_network_lab.anchor_top = 0.0
-	active_network_lab.anchor_right = 0.0
-	active_network_lab.anchor_bottom = 0.0
-	active_network_lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	active_network_lab.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var lab_h := maxf(_lab_floor(380.0), get_viewport().get_visible_rect().size.y - 240.0)
-	active_network_lab.custom_minimum_size = Vector2(0, lab_h)
-	root.add_child(active_network_lab)
-	if active_network_lab.has_method("setup"):
-		var preset: Array = []
-		var topo: Variant = page.get("topology", {})
-		if typeof(topo) == TYPE_DICTIONARY and not (topo as Dictionary).is_empty():
-			preset = [topo]
-		active_network_lab.call_deferred("setup", preset, simulation_guided_hints)
+	var preset: Array = []
+	var topo: Variant = page.get("topology", {})
+	if typeof(topo) == TYPE_DICTIONARY and not (topo as Dictionary).is_empty():
+		preset = [topo]
+	active_network_lab = _attach_lab(root, NETWORK_LAB_PATH, preset)
 	if active_network_lab.has_signal("action_submitted"):
 		active_network_lab.action_submitted.connect(_on_network_lab_action)
 
@@ -1181,9 +1388,9 @@ func _build_server_lab_simulation_page(page: Dictionary, is_assessment: bool) ->
 	var built: Array = _build_workstation_page(
 		page,
 		is_assessment,
-		_packed(SERVER_LAB_PATH),
+		SERVER_LAB_PATH,
 		"Server Workstation",
-		"Folders → Groups/Users → NTFS → Share → Client test."
+		"Folders → Groups/Users → NTFS → Share → Client test. Type each name exactly before you create it."
 	)
 	active_server_lab = built[1] as Control
 	if active_server_lab.has_signal("action_submitted"):
@@ -1199,7 +1406,7 @@ func _build_maintenance_bench_simulation_page(page: Dictionary, is_assessment: b
 	var built: Array = _build_workstation_page(
 		page,
 		is_assessment,
-		_packed(MAINTENANCE_BENCH_PATH),
+		MAINTENANCE_BENCH_PATH,
 		"Service Bench",
 		"Intake → Hardware PM → Software PM → Network → Repair & document.",
 		preset
@@ -1217,12 +1424,12 @@ func _build_crimp_lab_simulation_page(page: Dictionary, is_assessment: bool) -> 
 	# difference between a straight-through station and a crossover station.
 	var spec: Array = [str(page.get("end_a", "t568b")), str(page.get("end_b", "t568b"))]
 	var flow: String = (
-		"Strip → fan → order both ends to T568B → crimp → test."
+		"Strip → fan → order both ends to T568B → crimp → test. The How this step works strip explains each tool."
 		if spec[0] == spec[1]
-		else "Strip → fan → T568A on one end, T568B on the other → crimp → test."
+		else "Strip → fan → T568A on one end, T568B on the other → crimp → test. Follow How this step works for each tool."
 	)
 	var built: Array = _build_workstation_page(
-		page, is_assessment, _packed(CRIMP_LAB_PATH), "Crimping Bench", flow, spec
+		page, is_assessment, CRIMP_LAB_PATH, "Crimping Bench", flow, spec
 	)
 	active_crimp_lab = built[1] as Control
 	if active_crimp_lab.has_signal("action_submitted"):
@@ -1253,10 +1460,10 @@ func _build_crossover_task_page(page: Dictionary, is_assessment: bool) -> Contro
 	stage_row.add_child(crossover_bench_btn)
 	stage_row.add_child(crossover_site_btn)
 
-	active_crimp_lab = _attach_lab(root, _packed(CRIMP_LAB_PATH), spec)
+	active_crimp_lab = _attach_lab(root, CRIMP_LAB_PATH, spec)
 	if active_crimp_lab.has_signal("action_submitted"):
 		active_crimp_lab.action_submitted.connect(_on_crimp_lab_action)
-	active_network_lab = _attach_lab(root, _packed(NETWORK_LAB_PATH), [])
+	active_network_lab = _attach_lab(root, NETWORK_LAB_PATH, [])
 	if active_network_lab.has_signal("action_submitted"):
 		active_network_lab.action_submitted.connect(_on_network_lab_action)
 
@@ -1270,7 +1477,7 @@ func _stage_btn(label: String, stage: String) -> Button:
 	var btn := Button.new()
 	btn.text = label
 	btn.focus_mode = Control.FOCUS_NONE
-	btn.add_theme_font_size_override("font_size", 12)
+	btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	btn.pressed.connect(func() -> void: _show_crossover_stage(stage))
 	return btn
 
@@ -1336,17 +1543,25 @@ func _prior_bench_step_ids() -> Array:
 func _build_workstation_page(
 	page: Dictionary,
 	is_assessment: bool,
-	lab_scene: PackedScene,
+	lab_path: String,
 	default_eyebrow: String,
 	flow_hint: String,
 	preset: Array = []
 ) -> Array:
 	var root := _build_workstation_chrome(page, is_assessment, default_eyebrow, flow_hint)
-	return [root, _attach_lab(root, lab_scene, preset)]
+	return [root, _attach_lab(root, lab_path, preset)]
 
 
-func _attach_lab(root: Control, lab_scene: PackedScene, preset: Array) -> Control:
-	var lab := lab_scene.instantiate() as Control
+func _attach_lab(root: Control, lab_path: String, preset: Array) -> Control:
+	var lab: Control = _take_or_make_lab(lab_path)
+	if lab == null:
+		call_deferred("_retry_current_page_soon")
+		var placeholder := _build_empty_state(
+			"Loading workstation…",
+			"Warming up this lab. The page will refresh automatically."
+		)
+		root.add_child(placeholder)
+		return placeholder
 	lab.anchor_left = 0.0
 	lab.anchor_top = 0.0
 	lab.anchor_right = 0.0
@@ -1357,7 +1572,10 @@ func _attach_lab(root: Control, lab_scene: PackedScene, preset: Array) -> Contro
 	lab.custom_minimum_size = Vector2(0, lab_h)
 	root.add_child(lab)
 	if lab.has_method("setup"):
-		lab.call_deferred("setup", preset, simulation_guided_hints)
+		if simulation_is_pc_build:
+			lab.call_deferred("setup", preset, simulation_guided_hints, simulation_seed_state)
+		else:
+			lab.call_deferred("setup", preset, simulation_guided_hints)
 	return lab
 
 
@@ -1397,7 +1615,7 @@ func _build_workstation_chrome(
 
 	var phase_chip := Label.new()
 	phase_chip.text = str(page.get("eyebrow", default_eyebrow)).to_upper()
-	phase_chip.add_theme_font_size_override("font_size", 11)
+	phase_chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	phase_chip.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	top_row.add_child(phase_chip)
 
@@ -1407,7 +1625,7 @@ func _build_workstation_chrome(
 
 	simulation_progress_label = Label.new()
 	simulation_progress_label.text = "Step 0 / %d" % maxi(simulation_total_steps, 1)
-	simulation_progress_label.add_theme_font_size_override("font_size", 12)
+	simulation_progress_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	simulation_progress_label.add_theme_color_override("font_color", Color(0.75, 0.88, 0.95, 0.95))
 	top_row.add_child(simulation_progress_label)
 
@@ -1417,6 +1635,7 @@ func _build_workstation_chrome(
 	simulation_progress_bar.value = 0
 	simulation_progress_bar.show_percentage = false
 	simulation_progress_bar.custom_minimum_size = Vector2(120, 10)
+	_style_simulation_progress_bar(simulation_progress_bar)
 	top_row.add_child(simulation_progress_bar)
 
 	if is_assessment:
@@ -1424,7 +1643,7 @@ func _build_workstation_chrome(
 		reset_btn.text = "RESET"
 		reset_btn.focus_mode = Control.FOCUS_NONE
 		reset_btn.custom_minimum_size = Vector2(72, 28)
-		reset_btn.add_theme_font_size_override("font_size", 11)
+		reset_btn.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 		reset_btn.pressed.connect(_reset_current_assessment)
 		top_row.add_child(reset_btn)
 		_style_assessment_tool_btn(reset_btn)
@@ -1436,14 +1655,14 @@ func _build_workstation_chrome(
 	simulation_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simulation_instruction_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	simulation_instruction_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	simulation_instruction_label.add_theme_font_size_override("normal_font_size", 13 if _viewport_short() else 14)
+	simulation_instruction_label.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(13 if _viewport_short() else 14))
 	simulation_instruction_label.custom_minimum_size = Vector2(0, 20 if _viewport_short() else 22)
 	mission_col.add_child(simulation_instruction_label)
 
 	simulation_feedback_label = Label.new()
 	simulation_feedback_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	simulation_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	simulation_feedback_label.add_theme_font_size_override("font_size", 12)
+	simulation_feedback_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	simulation_feedback_label.add_theme_color_override("font_color", Color(0.72, 0.88, 0.95, 0.9))
 	simulation_feedback_label.text = flow_hint
 	mission_col.add_child(simulation_feedback_label)
@@ -1462,7 +1681,7 @@ func _build_workstation_chrome(
 		for pitfall in page.get("pitfalls", []):
 			var chip := Label.new()
 			chip.text = "• %s" % str(pitfall)
-			chip.add_theme_font_size_override("font_size", 11)
+			chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 			chip.add_theme_color_override("font_color", Color(1.0, 0.72, 0.45, 0.95))
 			pit_row.add_child(chip)
 
@@ -1487,10 +1706,10 @@ func _build_quiz_simulation_page(page: Dictionary, is_assessment: bool) -> Contr
 	header.add_child(copy)
 	copy.add_child(_eyebrow_label(page.get("eyebrow", "Phase")))
 	var title := _title_label(page.get("title", ""))
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(22))
 	copy.add_child(title)
 	var body := _body_label(page.get("description", ""))
-	body.add_theme_font_size_override("font_size", 13)
+	body.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	copy.add_child(body)
 
 	if is_assessment:
@@ -1506,7 +1725,7 @@ func _build_quiz_simulation_page(page: Dictionary, is_assessment: bool) -> Contr
 			for pitfall in pitfalls:
 				var chip := Label.new()
 				chip.text = "!  %s" % str(pitfall)
-				chip.add_theme_font_size_override("font_size", 12)
+				chip.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 				chip.add_theme_color_override("font_color", Color(1.0, 0.78, 0.32, 1))
 				pit_row.add_child(chip)
 
@@ -1578,7 +1797,7 @@ func _build_quiz_simulation_page(page: Dictionary, is_assessment: bool) -> Contr
 	simulation_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simulation_instruction_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	simulation_instruction_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	simulation_instruction_label.add_theme_font_size_override("normal_font_size", 16)
+	simulation_instruction_label.add_theme_font_size_override("normal_font_size", ResponsiveLayout.readable_font(16))
 	simulation_instruction_label.custom_minimum_size = Vector2(0, 36)
 	prompt_layout.add_child(simulation_instruction_label)
 
@@ -1589,7 +1808,7 @@ func _build_quiz_simulation_page(page: Dictionary, is_assessment: bool) -> Contr
 
 	simulation_progress_label = Label.new()
 	simulation_progress_label.text = "Question 0 / %d" % maxi(simulation_total_steps, 1)
-	simulation_progress_label.add_theme_font_size_override("font_size", 13)
+	simulation_progress_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	simulation_progress_label.add_theme_color_override("font_color", Color(0.75, 0.88, 0.95, 0.95))
 	progress_row.add_child(simulation_progress_label)
 
@@ -1601,19 +1820,20 @@ func _build_quiz_simulation_page(page: Dictionary, is_assessment: bool) -> Contr
 	simulation_progress_bar.show_percentage = true
 	simulation_progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	simulation_progress_bar.custom_minimum_size = Vector2(0, 14)
+	_style_simulation_progress_bar(simulation_progress_bar)
 	progress_row.add_child(simulation_progress_bar)
 
 	simulation_feedback_label = Label.new()
 	simulation_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simulation_feedback_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	simulation_feedback_label.add_theme_font_size_override("font_size", 13)
+	simulation_feedback_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	simulation_feedback_label.add_theme_color_override("font_color", Color(0.75, 0.88, 0.95, 0.9))
 	prompt_layout.add_child(simulation_feedback_label)
 
 	simulation_tip_label = Label.new()
 	simulation_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	simulation_tip_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	simulation_tip_label.add_theme_font_size_override("font_size", 12)
+	simulation_tip_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	simulation_tip_label.add_theme_color_override("font_color", Color(0.55, 0.82, 0.95, 0.88))
 	simulation_tip_label.text = ""
 	prompt_layout.add_child(simulation_tip_label)
@@ -1700,6 +1920,8 @@ func _rebuild_quiz_choices(current_step_id: String) -> void:
 		var sid: String = str(step_data.get("id", ""))
 		if sid == "" or sid == current_step_id:
 			continue
+		if simulation_completed_ids.has(sid):
+			continue
 		distractors.append(step_data)
 	distractors.shuffle()
 
@@ -1758,8 +1980,8 @@ func _build_model_gallery(model_titles: Array) -> Control:
 	panel.add_child(wrap)
 
 	var heading := Label.new()
-	heading.text = "Reference models · drag any model to rotate"
-	heading.add_theme_font_size_override("font_size", 12)
+	heading.text = "Reference images · tap a part card in quizzes"
+	heading.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	heading.add_theme_color_override("font_color", Color(0.55, 0.82, 0.95, 0.9))
 	wrap.add_child(heading)
 
@@ -1824,54 +2046,27 @@ func _build_inline_model_preview(model_title: String) -> Control:
 
 	var title_label := Label.new()
 	title_label.text = model_title
-	title_label.add_theme_font_size_override("font_size", 11)
+	title_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(11))
 	title_label.add_theme_color_override("font_color", Color(0.35, 0.82, 0.95, 1))
 	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title_label.clip_text = true
 	stack.add_child(title_label)
 	simulation_preview_label = title_label
 
-	var viewer: Control = _packed(CARD_VIEWER_PATH).instantiate() as Control
-	viewer.custom_minimum_size = Vector2(0, 88)
-	viewer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	viewer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	viewer.mouse_filter = Control.MOUSE_FILTER_STOP
-	stack.add_child(viewer)
-
-	var close_btn: Button = viewer.get_node_or_null("Button") as Button
-	if close_btn != null:
-		close_btn.visible = false
-
-	var sv := viewer.get_node_or_null("SubViewportContainer/SubViewport") as SubViewport
-	if sv != null:
-		sv.transparent_bg = false
-		if PerformanceProfile != null:
-			PerformanceProfile.apply_to_subviewport(sv, viewer)
-		else:
-			sv.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
-
-	var container: Node3D = viewer.get_node("SubViewportContainer/SubViewport/Node3D/ModelPivot/ModelContainer") as Node3D
-	simulation_preview_container = container
-	simulation_preview_viewer = viewer
-	if viewer.has_method("setup"):
-		viewer.setup(0.01, 0.2, 0.04)
-	if viewer.has_method("set_interactive"):
-		viewer.set_interactive(true)
-	if viewer.has_method("set_auto_rotate"):
-		viewer.set_auto_rotate(true)
-	# The gallery states this once in its heading; per-card overlays just sat on
-	# top of the models.
-	if viewer.has_method("set_hint_enabled"):
-		viewer.set_hint_enabled(false)
-
+	var image := TextureRect.new()
+	image.custom_minimum_size = Vector2(0, 88)
+	image.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	image.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var item: Dictionary = _find_model_item_by_title(model_title)
-	if not item.is_empty():
-		_pending_preview_loads.append({
-			"item": item,
-			"container": container,
-			"viewer": viewer,
-		})
+	if item.is_empty():
+		item = {"title": model_title, "part_id": model_title.to_lower().replace(" ", "_")}
+	image.texture = PartPreviewImage.texture_for(item)
+	stack.add_child(image)
 	return panel
+
 
 func _find_model_item_by_title(title: String) -> Dictionary:
 	for page in module_data.get("pages", []):
@@ -1900,7 +2095,17 @@ func _load_preview_model_into(item: Dictionary, container: Node3D, viewer: Contr
 	var scene_path: String = _safe_model_path(str(item.get("scene_path", "")))
 	if scene_path != "" and ResourceLoader.exists(scene_path):
 		var packed: PackedScene = _packed(scene_path)
-		if packed != null:
+		if packed == null:
+			var status := ResourceLoader.load_threaded_get_status(scene_path)
+			if status != ResourceLoader.THREAD_LOAD_FAILED:
+				_prefetch(scene_path)
+				_pending_preview_loads.append({
+					"item": item,
+					"container": container,
+					"viewer": viewer,
+				})
+				return
+		else:
 			model = packed.instantiate()
 			# Shared factory scene defaults to SSD — apply the item's part_id
 			# before entering the tree so _ready() builds the right mesh.
@@ -1981,6 +2186,12 @@ func _boost_preview_imported_materials(root: Node) -> void:
 
 
 func _safe_model_path(scene_path: String) -> String:
+	if ResourceWarmup != null and ResourceWarmup.has_method("prefer_light_path"):
+		return ResourceWarmup.prefer_light_path(scene_path)
+	if scene_path.ends_with(".gltf") or scene_path.ends_with(".glb"):
+		var light := scene_path.get_base_dir().path_join("model.tscn")
+		if ResourceLoader.exists(light):
+			return light
 	return scene_path
 
 
@@ -2019,7 +2230,7 @@ func _card_panel(panel_color: Color) -> PanelContainer:
 func _eyebrow_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = text_value.to_upper()
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(12))
 	label.add_theme_color_override("font_color", Color(0.35, 0.82, 0.95, 1))
 	return label
 
@@ -2028,7 +2239,7 @@ func _title_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = text_value
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(28))
 	label.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0, 1))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
@@ -2038,7 +2249,7 @@ func _subtitle_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = text_value
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(16))
 	label.add_theme_color_override("font_color", Color(0.78, 0.9, 0.96, 0.88))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
@@ -2049,7 +2260,7 @@ func _body_label(text_value: String) -> Label:
 	label.text = text_value
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 	label.add_theme_color_override("font_color", Color(0.86, 0.93, 0.97, 0.92))
 	return label
 
@@ -2057,7 +2268,7 @@ func _body_label(text_value: String) -> Label:
 func _section_title(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = text_value
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 	label.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0, 1))
 	return label
 
@@ -2066,7 +2277,7 @@ func _bullet_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = "•  %s" % text_value
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))
 	label.add_theme_color_override("font_color", Color(0.86, 0.93, 0.97, 0.92))
 	return label
 
@@ -2075,7 +2286,7 @@ func _warning_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = "!  %s" % text_value
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.32, 1))
 	return label
 
@@ -2091,7 +2302,7 @@ func _step_label(index: int, text_value: String) -> HBoxContainer:
 	badge.custom_minimum_size = Vector2(40, 40)
 	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	badge.add_theme_font_size_override("font_size", 13)
+	badge.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(13))
 	badge.add_theme_color_override("font_color", Color(0.02, 0.08, 0.12, 1))
 
 	var badge_style := StyleBoxFlat.new()
@@ -2108,7 +2319,7 @@ func _step_label(index: int, text_value: String) -> HBoxContainer:
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_label.custom_minimum_size = Vector2(0, 0)
-	text_label.add_theme_font_size_override("font_size", 15)
+	text_label.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(15))
 	text_label.add_theme_color_override("font_color", Color(0.92, 0.96, 0.99, 0.95))
 	row.add_child(text_label)
 
@@ -2147,7 +2358,7 @@ func _apply_action_button_style(button: Button) -> void:
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)
 	button.add_theme_stylebox_override("disabled", disabled)
-	button.add_theme_font_size_override("font_size", 14)
+	button.add_theme_font_size_override("font_size", ResponsiveLayout.readable_font(14))
 	button.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0, 1))
 	button.add_theme_color_override("font_hover_color", Color(1, 1, 1, 1))
 	button.add_theme_color_override("font_pressed_color", Color(0.9, 0.98, 1.0, 1))
@@ -2169,54 +2380,93 @@ func _build_empty_state(title_text: String, body_text: String) -> Control:
 
 
 func _update_navigation_state() -> void:
-	var page_count: int = module_data.get("pages", []).size()
+	var pages: Array = module_data.get("pages", [])
+	var page_count: int = pages.size()
 	prev_btn.disabled = current_page_index <= 0
-	next_btn.disabled = current_page_index >= page_count - 1
+	var on_last: bool = current_page_index >= page_count - 1
+	# Inside a module, Next stays locked until the current page is cleared —
+	# sims must finish; reading pages clear on view. Modules on Home stay free.
+	next_btn.disabled = on_last or not _can_advance_from_current_page()
+	next_btn.tooltip_text = ""
+	if next_btn.disabled and not on_last and current_page_index >= 0 and current_page_index < page_count:
+		var page: Dictionary = pages[current_page_index] as Dictionary
+		if _page_requires_simulation_clear(page):
+			next_btn.tooltip_text = "Finish this simulation before continuing"
 
 
 func _on_prev_btn_pressed() -> void:
 	if _page_turn_busy or current_page_index <= 0:
 		return
-	_page_turn_busy = true
 	UiMotion.pulse_button(prev_btn)
 	current_page_index -= 1
-	_finish_page_turn_async()
+	_turn_page_now()
 
 
 func _on_next_btn_pressed() -> void:
 	if _page_turn_busy:
 		return
-	var pages: Array = module_data.get("pages", [])
-	if current_page_index >= pages.size() - 1:
-		_on_exit_btn_pressed()
+	if Time.get_ticks_msec() < _nav_ignore_until_ms:
 		return
-	_page_turn_busy = true
+	if not _can_advance_from_current_page():
+		return
+	var pages: Array = module_data.get("pages", [])
+	# Last page is celebration only — leave via Back to Home / Exit, never Next.
+	if current_page_index >= pages.size() - 1:
+		return
 	UiMotion.pulse_button(next_btn)
 	current_page_index += 1
-	_finish_page_turn_async()
+	var landing: Dictionary = pages[current_page_index] as Dictionary
+	# Completing a sim then tapping Next can land on the celebration page with
+	# the finger still down where Back to Home is drawn — ignore that press.
+	if str(landing.get("type", "")) == "completion":
+		_nav_ignore_until_ms = Time.get_ticks_msec() + 900
+	else:
+		_nav_ignore_until_ms = Time.get_ticks_msec() + 400
+	_turn_page_now()
 
 
-func _finish_page_turn_async() -> void:
+func _turn_page_now() -> void:
+	# Never await on Next/Prev — chrome updates immediately, labs come from the pool.
+	_page_turn_busy = true
 	_pending_preview_loads.clear()
+	# Stop any live 3D catalog render before tearing the page down.
+	if active_hardware_lab != null and is_instance_valid(active_hardware_lab):
+		if active_hardware_lab.has_method("shutdown_lab"):
+			active_hardware_lab.call("shutdown_lab")
 	var pages: Array = module_data.get("pages", [])
-	if current_page_index >= 0 and current_page_index < pages.size():
-		var page: Dictionary = pages[current_page_index] as Dictionary
-		# Parts Lab only needs the light InteractiveHardwareLab scene — short wait.
-		var timeout_ms := 1500 if str(page.get("type", "")) == "model_library" else 8000
-		await _await_critical_paths(_paths_for_page(page), timeout_ms)
-	if not is_instance_valid(self):
-		return
+	if page_counter_label != null:
+		page_counter_label.text = "%d / %d" % [current_page_index + 1, pages.size()]
 	_render_page()
+	_page_turn_busy = false
+	# Safety: never leave Next dead if render throws mid-frame.
+	call_deferred("_clear_page_turn_busy")
+	# Re-assert nav stays above page content after layout.
+	var navigation := get_node_or_null("Wrapper/Navigation") as Control
+	if navigation != null:
+		navigation.z_index = 20
+		navigation.move_to_front()
+
+
+func _clear_page_turn_busy() -> void:
 	_page_turn_busy = false
 
 
 func _on_exit_btn_pressed() -> void:
-	var host: Node = get_parent()
-	while host != null and not host.has_method("send_event"):
-		host = host.get_parent()
-
-	if host != null:
-		host.send_event("destroy", module_id)
+	# Ignore the tap that often arrives with the page-turn that opened this view.
+	if Time.get_ticks_msec() < _nav_ignore_until_ms:
+		return
+	# Only mark the path complete when the learner leaves FROM the completion
+	# page. If they already glimpsed it, then Prev back to an earlier page,
+	# Exit must not fire guided/assessment_completed — that popped Module 3
+	# page 7 (and Module 4 page 10) straight back to Home.
+	var pages: Array = module_data.get("pages", [])
+	var on_completion := false
+	if current_page_index >= 0 and current_page_index < pages.size():
+		on_completion = str((pages[current_page_index] as Dictionary).get("type", "")) == "completion"
+	if on_completion and not _path_completion_emitted:
+		_emit_path_completed_once()
+		return
+	_emit_host_event("destroy")
 
 
 func _connect_simulation_signals() -> void:
@@ -2265,12 +2515,16 @@ func _reset_current_assessment() -> void:
 	_pending_correct_tip = ""
 	if active_build_bench != null and active_build_bench.has_method("reset_scenario"):
 		active_build_bench.reset_scenario()
+		if active_build_bench.has_method("set_interaction_locked"):
+			active_build_bench.set_interaction_locked(false)
 	if active_crimp_lab != null and active_crimp_lab.has_method("reset_scenario"):
 		active_crimp_lab.reset_scenario()
 	if active_network_lab != null and active_network_lab.has_method("reset_scenario"):
 		active_network_lab.reset_scenario()
 	if active_server_lab != null and active_server_lab.has_method("reset_scenario"):
 		active_server_lab.reset_scenario()
+	if active_maintenance_bench != null and active_maintenance_bench.has_method("reset_scenario"):
+		active_maintenance_bench.reset_scenario()
 	if simulation_is_crossover_task:
 		_show_crossover_stage("bench")
 	_start_simulation()
@@ -2294,6 +2548,8 @@ func _style_assessment_tool_btn(button: Button) -> void:
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_color_override("font_color", Color(1.0, 0.82, 0.62))
+	button.add_theme_color_override("font_hover_color", Color(1.0, 0.9, 0.75))
+	button.add_theme_color_override("font_pressed_color", Color(1.0, 0.82, 0.62))
 
 
 func _on_simulation_step_pressed(step_data: Dictionary) -> void:
@@ -2340,17 +2596,19 @@ func _update_simulation_progress_ui() -> void:
 			simulation_progress_label.text = "%s %d / %d" % [unit, current_q, total]
 
 
-func _refresh_answer_button_states(_current_step_id: String = "") -> void:
+func _refresh_answer_button_states(current_step_id: String = "") -> void:
 	for step_id_variant in simulation_buttons.keys():
 		var step_id: String = str(step_id_variant)
 		var button: Button = simulation_buttons[step_id] as Button
 		if button == null or not is_instance_valid(button):
 			continue
-		if simulation_completed_ids.has(step_id):
+		# Only the current question's correct pick stays highlighted. Previous
+		# step ids reused as distractors used to light up green as well.
+		if current_step_id != "" and step_id == current_step_id and simulation_completed_ids.has(step_id):
 			button.disabled = true
 			_apply_answer_result_style(button, true)
 		else:
-			button.disabled = false
+			button.disabled = _quiz_choice_locked
 			_apply_action_button_style(button)
 			button.modulate = Color(1, 1, 1, 1)
 
@@ -2580,6 +2838,10 @@ func _on_simulation_completed() -> void:
 		var button: Button = button_variant as Button
 		if button != null and is_instance_valid(button):
 			button.disabled = true
+	if active_build_bench != null and active_build_bench.has_method("set_interaction_locked"):
+		active_build_bench.set_interaction_locked(true)
+	_mark_current_page_complete()
+	_nav_ignore_until_ms = Time.get_ticks_msec() + 800
 	# Host completion events fire on the completion page (_emit_path_completed_once).
 
 

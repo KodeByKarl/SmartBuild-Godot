@@ -3,6 +3,9 @@ extends RefCounted
 
 ## Builds dark glass chrome + common Module 0 slide layouts.
 
+## Neon-on-black slide art, keyed after the first decode so later slides stay cheap.
+static var _art_cache: Dictionary = {}
+
 
 static func mount(root: Control) -> VBoxContainer:
 	for child in root.get_children():
@@ -59,12 +62,30 @@ static func make_label(text: String, settings: LabelSettings, expand: bool = tru
 
 
 static func make_art(path: String, min_h: float = 200.0, ratio: float = 1.0) -> Control:
+	# Neon-cyan-on-black PNGs vanish on navy chrome. Knock out the black and sit
+	# the lines on a pale well so the drawing (and CSS NC II badge text) reads.
+	var frame := PanelContainer.new()
+	frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.custom_minimum_size = Vector2(180, min_h)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.86, 0.94, 0.97, 1)
+	style.border_color = Color(0.09, 0.65, 0.87, 0.7)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(14)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	frame.add_theme_stylebox_override("panel", style)
+
 	var wrap := AspectRatioContainer.new()
 	wrap.ratio = ratio
 	wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	wrap.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	wrap.custom_minimum_size = Vector2(0, min_h)
 	wrap.stretch_mode = AspectRatioContainer.STRETCH_FIT
+	frame.add_child(wrap)
 
 	var tex := TextureRect.new()
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -72,7 +93,7 @@ static func make_art(path: String, min_h: float = 200.0, ratio: float = 1.0) -> 
 	tex.texture = _load_texture(path)
 	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	wrap.add_child(tex)
-	return wrap
+	return frame
 
 
 static func make_card(title: String, body: String, accent: bool = false, art_path: String = "") -> PanelContainer:
@@ -90,15 +111,7 @@ static func make_card(title: String, body: String, accent: bool = false, art_pat
 	col.add_child(make_label(body, Module0SlideTheme.card_body_settings()))
 
 	if art_path != "":
-		var art := TextureRect.new()
-		art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		art.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		art.custom_minimum_size = Vector2(0, 100)
-		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		art.texture = _load_texture(art_path)
-		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		col.add_child(art)
+		col.add_child(make_art(art_path, 160.0, 1.4))
 	return card
 
 
@@ -186,8 +199,8 @@ static func stacked_art(content: VBoxContainer, title: String, subtitle: String,
 	arts.size_flags_stretch_ratio = 0.9
 	arts.add_theme_constant_override("separation", 12)
 	row.add_child(arts)
-	arts.add_child(make_art(art_a, 140.0, 1.4))
-	arts.add_child(make_art(art_b, 140.0, 1.4))
+	arts.add_child(make_art(art_a, 220.0, 1.4))
+	arts.add_child(make_art(art_b, 220.0, 1.4))
 
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -223,12 +236,41 @@ static func header_body(content: VBoxContainer, title: String, subtitle: String,
 
 
 static func _load_texture(path: String) -> Texture2D:
-	if path == "" or not ResourceLoader.exists(path):
+	if path.is_empty():
 		return null
-	var tex: Texture2D = load(path) as Texture2D
-	if tex != null:
-		return tex
+	if _art_cache.has(path):
+		return _art_cache[path] as Texture2D
+	if not ResourceLoader.exists(path):
+		return null
+
 	var image := Image.new()
-	if image.load(path) == OK:
-		return ImageTexture.create_from_image(image)
-	return null
+	if image.load(path) != OK:
+		var tex: Texture2D = load(path) as Texture2D
+		if tex == null:
+			return null
+		image = tex.get_image()
+		if image == null:
+			_art_cache[path] = tex
+			return tex
+
+	_knockout_near_black(image)
+	var out := ImageTexture.create_from_image(image)
+	_art_cache[path] = out
+	return out
+
+
+static func _knockout_near_black(image: Image) -> void:
+	if image.is_compressed():
+		image.decompress()
+	if image.get_format() != Image.FORMAT_RGBA8:
+		image.convert(Image.FORMAT_RGBA8)
+	image.clear_mipmaps()
+	var data := image.get_data()
+	var n := data.size()
+	# luma ≈ (54r + 183g + 18b) >> 8; 0.16 * 255 ≈ 41
+	var luma_limit := 41 * 256
+	for i in range(0, n, 4):
+		var luma: int = int(data[i]) * 54 + int(data[i + 1]) * 183 + int(data[i + 2]) * 18
+		if luma < luma_limit:
+			data[i + 3] = 0
+	image.set_data(image.get_width(), image.get_height(), false, Image.FORMAT_RGBA8, data)
