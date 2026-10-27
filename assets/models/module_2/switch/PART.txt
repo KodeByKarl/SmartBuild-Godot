@@ -1,4 +1,0 @@
-﻿PART: Switch
-MODULE: 2
-CATEGORY: Core Network
-FILE: model.tscn (procedural via Module2PartFactory)

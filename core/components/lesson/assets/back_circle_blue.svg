@@ -1,0 +1,7 @@
+<svg width="84" height="80" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Figma SMARTBUILD "Prep Lesson - page 0": Ellipse 2 (1:224) + Arrow 2 (1:232), arrow turned to point left as placed in the frame. -->
+<ellipse cx="10.5" cy="10" rx="10.5" ry="10" fill="#14A5DC"/>
+<g transform="translate(10.5 10) rotate(180) scale(0.93) translate(-7 -7.36396)">
+<path d="M0 7.36396V8.36396H13V7.36396V6.36396H0V7.36396ZM13.7071 8.07107C14.0976 7.68054 14.0976 7.04738 13.7071 6.65685L7.34315 0.292893C6.95262 -0.097631 6.31946 -0.097631 5.92893 0.292893C5.53841 0.683418 5.53841 1.31658 5.92893 1.70711L11.5858 7.36396L5.92893 13.0208C5.53841 13.4113 5.53841 14.0445 5.92893 14.435C6.31946 14.8256 6.95262 14.8256 7.34315 14.435L13.7071 8.07107Z" fill="white"/>
+</g>
+</svg>

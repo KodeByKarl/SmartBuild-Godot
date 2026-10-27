@@ -1,0 +1,8 @@
+Model Information:
+* title:	CPU Cooler
+* source:	https://sketchfab.com/3d-models/cpu-cooler-672a0a74a98c452a862016bee99f3579
+* author:	Fochdog (https://sketchfab.com/bazyaev08)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Credit author, share alike permitted under CC-BY-4.0

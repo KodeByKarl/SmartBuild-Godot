@@ -1,7 +1,7 @@
 class_name PartPreviewImage
 extends RefCounted
 
-## 2D part previews for Parts Catalog / quiz galleries.
+## 2D part previews for the Parts Catalog and simulation part trays.
 ## Loads PNG if present, otherwise draws a readable teaching illustration.
 
 const PART_ICON_DIR := "res://assets/images/parts"
@@ -35,9 +35,53 @@ static func texture_for_id(part_id: String, title: String = "") -> Texture2D:
 			_cache[key] = loaded_alt
 			return loaded_alt as Texture2D
 
+	# Prefer recognizable teaching cards over procedural sketches.
+	var card := _card_fallback(key)
+	if card != "":
+		var card_path := "res://assets/images/cards/%s" % card
+		if ResourceLoader.exists(card_path):
+			var card_tex: Resource = load(card_path)
+			if card_tex is Texture2D:
+				_cache[key] = card_tex
+				return card_tex as Texture2D
+
 	var drawn := _draw_preview(key, title if title != "" else key)
 	_cache[key] = drawn
 	return drawn
+
+
+static func _card_fallback(part_id: String) -> String:
+	match part_id:
+		"motherboard", "mb":
+			return "card_motherboard.png"
+		"cpu", "chips":
+			return "card_cpu.png"
+		"ram", "memory":
+			return "card_ram.png"
+		"psu", "power_supply", "atx":
+			return "card_psu.png"
+		"hdd", "ssd", "storage", "flash":
+			return "card_storage.png"
+		"cpu_fan", "cooler", "fan", "cooling":
+			return "card_cooling.png"
+		"case", "chassis", "optical_drive":
+			return "card_system_unit.png"
+		"nic", "network_card":
+			return "card_network.png"
+		"gpu", "graphics", "expansion":
+			return "card_expansion.png"
+		"rj45", "port":
+			return "card_port.png"
+		"ethernet_cable", "fiber_cable", "cable":
+			return "card_connector.png"
+		"crimper", "cable_tester", "tools":
+			return "card_tools.png"
+		"monitor", "display":
+			return "card_monitor.png"
+		"router", "switch", "modem", "access_point", "hub", "firewall", "repeater", "patch_panel":
+			return "card_network.png"
+		_:
+			return ""
 
 
 static func _resolve_id(item: Dictionary) -> String:

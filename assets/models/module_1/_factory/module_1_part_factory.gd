@@ -15,6 +15,8 @@ static func build_into(root: Node3D, part_id: String) -> void:
 			_build_ram(root)
 		"chips":
 			_build_chips(root)
+		"optical":
+			_build_optical(root)
 		"ssd":
 			_build_ssd(root)
 		"hdd":
@@ -25,12 +27,26 @@ static func build_into(root: Node3D, part_id: String) -> void:
 			_build_psu(root)
 		"gpu":
 			_build_gpu(root)
+		"sata_power":
+			_build_sata_power(root)
 		"atx":
 			_build_atx(root)
+		"atx_24pin":
+			_build_atx(root)
+		"cpu_power":
+			_build_cpu_power(root)
+		"fan_cable":
+			_build_fan_cable(root)
+		"front_wires":
+			_build_front_wires(root)
 		"case":
 			_build_case(root)
 		"fan":
 			_build_fan(root)
+		"cooler", "cpu_fan":
+			_build_cpu_cooler(root)
+		"side_panel":
+			_build_side_panel(root)
 		"antistatic":
 			_build_antistatic(root)
 		"screwdriver":
@@ -133,6 +149,8 @@ static func _build_cpu(root: Node3D) -> void:
 
 
 static func _build_ram(root: Node3D) -> void:
+	# Length along X, height along Y, thin along Z — bench applies (90,0,90)
+	# so the stick stands out of the board and matches vertical DIMM slots.
 	var pcb := _mat(Color(0.08, 0.35, 0.75))
 	var chip := _mat(Color(0.08, 0.08, 0.1), 0.05, 0.7)
 	var gold := _mat(Color(0.92, 0.74, 0.18), 0.7, 0.28)
@@ -178,6 +196,29 @@ static func _build_hdd(root: Node3D) -> void:
 	_box(root, "Connector", Vector3(1.2, -0.05, 0), Vector3(0.2, 0.25, 0.9), dark)
 
 
+static func _build_optical(root: Node3D) -> void:
+	# Slim optical drive — dark faceplate + tray slit
+	var body := _mat(Color(0.22, 0.23, 0.26), 0.25, 0.5)
+	var face := _mat(Color(0.08, 0.08, 0.09), 0.15, 0.6)
+	var slit := _mat(Color(0.02, 0.02, 0.02))
+	_box(root, "Chassis", Vector3.ZERO, Vector3(2.8, 0.45, 1.7), body)
+	_box(root, "Face", Vector3(0, 0, 0.88), Vector3(2.7, 0.4, 0.08), face)
+	_box(root, "TraySlit", Vector3(0, 0.02, 0.9), Vector3(2.2, 0.06, 0.04), slit)
+	_box(root, "Eject", Vector3(1.1, -0.08, 0.92), Vector3(0.18, 0.08, 0.04), _mat(Color(0.45, 0.48, 0.52)))
+
+
+static func _build_sata_power(root: Node3D) -> void:
+	# SATA power lead — yellow/black/red/orange bundle + connector
+	var shell := _mat(Color(0.08, 0.08, 0.1), 0.05, 0.55)
+	var gold := _mat(Color(0.92, 0.72, 0.12), 0.7, 0.3)
+	_box(root, "Plug", Vector3.ZERO, Vector3(1.1, 0.35, 0.55), shell)
+	_box(root, "Contacts", Vector3(0, -0.12, 0.2), Vector3(0.9, 0.08, 0.2), gold)
+	_box(root, "Yel", Vector3(-0.55, 0.05, -0.45), Vector3(0.2, 0.12, 0.55), _mat(Color(0.95, 0.85, 0.1)))
+	_box(root, "Blk", Vector3(-0.2, 0.05, -0.45), Vector3(0.2, 0.12, 0.55), _mat(Color(0.05, 0.05, 0.06)))
+	_box(root, "Red", Vector3(0.15, 0.05, -0.45), Vector3(0.2, 0.12, 0.55), _mat(Color(0.9, 0.12, 0.1)))
+	_box(root, "Org", Vector3(0.5, 0.05, -0.45), Vector3(0.2, 0.12, 0.55), _mat(Color(0.95, 0.45, 0.05)))
+
+
 static func _build_flash(root: Node3D) -> void:
 	# Signature: bright cyan stick
 	var body := _mat(Color(0.05, 0.78, 0.88))
@@ -218,7 +259,7 @@ static func _build_gpu(root: Node3D) -> void:
 
 
 static func _build_atx(root: Node3D) -> void:
-	# Signature: white housing + gold pins + red latch
+	# Signature: white housing + gold pins + red latch (24-pin ATX)
 	var shell := _mat(Color(0.96, 0.96, 0.98), 0.02, 0.65)
 	var pin := _mat(Color(0.95, 0.72, 0.1), 0.75, 0.28)
 	var latch := _mat(Color(0.9, 0.15, 0.12))
@@ -233,6 +274,56 @@ static func _build_atx(root: Node3D) -> void:
 				Vector3(0.08, 0.22, 0.08),
 				pin
 			)
+
+
+static func _build_cpu_power(root: Node3D) -> void:
+	# 8-pin EPS — black shell + yellow key + gold pins
+	var shell := _mat(Color(0.12, 0.12, 0.14), 0.05, 0.55)
+	var key := _mat(Color(0.95, 0.82, 0.12))
+	var pin := _mat(Color(0.92, 0.7, 0.12), 0.7, 0.3)
+	_box(root, "Housing", Vector3.ZERO, Vector3(1.15, 0.5, 0.7), shell)
+	_box(root, "Key", Vector3(0.35, 0.28, 0), Vector3(0.28, 0.12, 0.35), key)
+	for row in 2:
+		for col in 4:
+			_box(
+				root,
+				"Pin_%d_%d" % [row, col],
+				Vector3(-0.42 + col * 0.22, -0.02, -0.14 + row * 0.28),
+				Vector3(0.1, 0.2, 0.1),
+				pin
+			)
+
+
+static func _build_fan_cable(root: Node3D) -> void:
+	# 4-pin CPU_FAN header plug + short black cable
+	var shell := _mat(Color(0.15, 0.15, 0.18), 0.05, 0.5)
+	var pin := _mat(Color(0.92, 0.72, 0.15), 0.7, 0.3)
+	var cable := _mat(Color(0.08, 0.08, 0.1), 0.02, 0.7)
+	_box(root, "Plug", Vector3(0, 0.05, 0), Vector3(0.85, 0.35, 0.45), shell)
+	for i in 4:
+		_box(root, "Pin%d" % i, Vector3(-0.28 + i * 0.18, -0.08, 0), Vector3(0.08, 0.18, 0.08), pin)
+	_box(root, "Cable", Vector3(0, 0.05, -0.55), Vector3(0.22, 0.14, 0.7), cable)
+	_cyl(root, "Bend", Vector3(0, 0.05, -0.95), 0.1, 0.22, cable, Vector3(0, 0, deg_to_rad(90)))
+
+
+static func _build_front_wires(root: Node3D) -> void:
+	# Front-panel harness — colored wire stubs + 2-pin plugs (not a screwdriver)
+	var blk := _mat(Color(0.1, 0.1, 0.12), 0.05, 0.55)
+	var red := _mat(Color(0.9, 0.15, 0.12))
+	var grn := _mat(Color(0.2, 0.85, 0.35))
+	var blu := _mat(Color(0.2, 0.45, 0.95))
+	var yel := _mat(Color(0.95, 0.82, 0.15))
+	var wht := _mat(Color(0.92, 0.92, 0.95))
+	_box(root, "BundleTie", Vector3(0, 0, 0), Vector3(0.35, 0.22, 0.55), blk)
+	var colors: Array = [red, wht, grn, blu, yel, blk]
+	for i in colors.size():
+		var mat: StandardMaterial3D = colors[i]
+		var z := -0.55 - float(i) * 0.12
+		_box(root, "Wire%d" % i, Vector3(-0.35 + (i % 3) * 0.2, 0.02, z * 0.15), Vector3(0.08, 0.08, 1.1), mat)
+	_box(root, "PlugA", Vector3(-0.25, 0.02, 0.7), Vector3(0.35, 0.2, 0.28), blk)
+	_box(root, "PlugB", Vector3(0.2, 0.02, 0.7), Vector3(0.35, 0.2, 0.28), blk)
+	_box(root, "PinA", Vector3(-0.25, -0.08, 0.82), Vector3(0.12, 0.1, 0.1), yel)
+	_box(root, "PinB", Vector3(0.2, -0.08, 0.82), Vector3(0.12, 0.1, 0.1), yel)
 
 
 static func _build_case(root: Node3D) -> void:
@@ -250,7 +341,7 @@ static func _build_case(root: Node3D) -> void:
 
 
 static func _build_fan(root: Node3D) -> void:
-	# Signature: black frame + orange blades
+	# Signature: black frame + orange blades (chassis / case fan).
 	var frame := _mat(Color(0.12, 0.12, 0.14), 0.25, 0.45)
 	var blade := _mat(Color(1.0, 0.45, 0.08))
 	var hub := _mat(Color(0.35, 0.35, 0.38), 0.3, 0.4)
@@ -270,6 +361,45 @@ static func _build_fan(root: Node3D) -> void:
 		mi.position = Vector3(cos(angle) * 0.55, sin(angle) * 0.55, 0)
 		mi.rotation = Vector3(0, 0, angle)
 		blades.add_child(mi)
+
+
+static func _build_cpu_cooler(root: Node3D) -> void:
+	# Tower-style CPU cooler: heatsink fins + top fan — distinct from chassis fan.
+	var fin := _mat(Color(0.72, 0.74, 0.78), 0.55, 0.35)
+	var base := _mat(Color(0.35, 0.36, 0.4), 0.45, 0.4)
+	var frame := _mat(Color(0.1, 0.1, 0.12), 0.2, 0.5)
+	var blade := _mat(Color(0.2, 0.65, 0.95))
+	var hub := _mat(Color(0.25, 0.28, 0.32), 0.3, 0.45)
+	_box(root, "ColdPlate", Vector3(0, -0.55, 0), Vector3(1.1, 0.12, 1.1), base)
+	for i in 8:
+		_box(root, "Fin%d" % i, Vector3(-0.7 + i * 0.2, 0.05, 0), Vector3(0.08, 1.1, 1.35), fin)
+	_box(root, "Heatpipes", Vector3(0, -0.2, 0), Vector3(0.35, 0.2, 0.9), _mat(Color(0.85, 0.55, 0.15), 0.7, 0.3))
+	_box(root, "FanFrame", Vector3(0, 0.75, 0), Vector3(1.5, 0.28, 1.5), frame)
+	_cyl(root, "FanHub", Vector3(0, 0.78, 0), 0.22, 0.2, hub)
+	var blades := Node3D.new()
+	blades.name = "Blades"
+	blades.position = Vector3(0, 0.78, 0)
+	root.add_child(blades)
+	for i in 6:
+		var angle := float(i) / 6.0 * TAU
+		var b := BoxMesh.new()
+		b.size = Vector3(0.18, 0.55, 0.05)
+		var mi := MeshInstance3D.new()
+		mi.name = "Blade%d" % i
+		mi.mesh = b
+		mi.material_override = blade
+		mi.position = Vector3(cos(angle) * 0.38, 0, sin(angle) * 0.38)
+		mi.rotation = Vector3(0, angle, 0)
+		blades.add_child(mi)
+
+
+static func _build_side_panel(root: Node3D) -> void:
+	# Thin vertical side panel (open-face cover) — never a huge horizontal lid.
+	var metal := _mat(Color(0.28, 0.32, 0.38), 0.35, 0.45)
+	var glass := _mat(Color(0.2, 0.7, 0.85, 0.28), 0.05, 0.2)
+	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_box(root, "Panel", Vector3.ZERO, Vector3(0.08, 3.2, 2.2), metal)
+	_box(root, "Window", Vector3(0.05, 0.1, 0.0), Vector3(0.04, 2.4, 1.6), glass)
 
 
 static func _build_antistatic(root: Node3D) -> void:

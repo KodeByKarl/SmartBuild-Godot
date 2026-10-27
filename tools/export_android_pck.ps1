@@ -30,6 +30,8 @@ if ($OutputPck -eq "") {
 if ($GodotExe -eq "") {
 	$candidates = @(
 		$env:GODOT_BIN,
+		"d:\Porjects\Smartbuild\tools\godot\Godot_v4.7.2-stable_win64.exe",
+		(Join-Path (Split-Path -Parent $ProjectRoot) "tools\godot\Godot_v4.7.2-stable_win64.exe"),
 		"C:\Users\Administrator\Desktop\Godot_v4.7.2-stable_win64.exe",
 		"C:\Program Files\Godot\Godot_v4.7.2-stable_win64.exe",
 		"godot"

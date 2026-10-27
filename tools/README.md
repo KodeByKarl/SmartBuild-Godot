@@ -1,18 +1,22 @@
 # SmartBuild Godot — tools
 
-## Android PCK export (required for phone modules)
+## Android PCK export (required for phone Module 0–1)
 
 ```powershell
 .\tools\export_android_pck.ps1
 ```
 
-Writes `SmartBuild/app/src/main/assets/SmartBuildGodot.pck` (~200+ MB). Run after changing Godot content before rebuilding the Android app.
+Writes `SmartBuild/app/src/main/assets/SmartBuildGodot.pck` (~75–80 MB after M2–M4 slim).  
+Run after changing Godot content before rebuilding the Android app.
+
+**Note:** Modules 2–4 run as Compose on Android — they are not packed into this `.pck`.
 
 ## CI regression suite
 
-`regress_probe.gd` is the single headless suite for Modules 1–4. It walks every page, drives interactive sims to completion, and exits non-zero on stuck or unhandled steps.
+`regress_probe.gd` is the headless suite for **Module 1** (ModuleShell + PcBuildBench).  
+It walks every page, drives the PC build sim to completion, and exits non-zero on stuck steps.
 
-Module 0 (intro slides) uses a separate shell with the same **Search** / **Help** header chrome; it is not part of `regress_probe` because it has no SimulationManager steps.
+Module 0 (intro slides) is not part of `regress_probe` (no SimulationManager steps).
 
 ### Local (Windows)
 
@@ -36,17 +40,12 @@ Report file: `%APPDATA%\Godot\app_userdata\SmartBuildGodot\regress_probe.txt`
 
 ## UI chrome probe
 
-`UiChangeProbe.tscn` checks the shared shell chrome across Module 0 and Modules 1–4:
-Exit pinned to the top-left of the header, Prev / page counter / Next grouped in the
-nav bar, Assessment opening on the assessment page, the completion page not exiting
-until the learner leaves it, and touch-drag scrolling being attached to new
-`ScrollContainer`s. Unlike `regress_probe` it needs a scene, not `--script`:
+`UiChangeProbe.tscn` checks shared shell chrome for Module 0 and Module 1  
+(Exit / Prev / page counter / Next, Assessment entry, scroll). Needs a scene:
 
 ```text
 godot --headless --path . res://tools/UiChangeProbe.tscn
 ```
-
-Exits non-zero on the first failed check.
 
 ### GitHub Actions
 

@@ -159,10 +159,12 @@ func _inner_claim(node: Node, point: Vector2) -> bool:
 ## Clears the in-progress press so lifting the finger after a drag does not
 ## activate whatever card or button the gesture started on.
 func _cancel_touched_buttons() -> void:
-	_cancel_hovered(_scroll)
+	cancel_presses(_scroll)
 
 
-func _cancel_hovered(node: Node) -> void:
+## Shared with TouchSwipePager: drops any button press under `node` once a
+## drag gesture has claimed the finger.
+static func cancel_presses(node: Node) -> void:
 	for child in node.get_children():
 		var button := child as BaseButton
 		if button != null and (button.is_pressed() or button.is_hovered()):
@@ -171,4 +173,4 @@ func _cancel_hovered(node: Node) -> void:
 			var was_disabled: bool = button.disabled
 			button.disabled = true
 			button.disabled = was_disabled
-		_cancel_hovered(child)
+		cancel_presses(child)

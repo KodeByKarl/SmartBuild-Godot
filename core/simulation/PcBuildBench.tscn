@@ -4,10 +4,10 @@
 
 [sub_resource type="Environment" id="Environment_bench"]
 background_mode = 1
-background_color = Color(0.04, 0.07, 0.1, 1)
+background_color = Color(0.16, 0.18, 0.22, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.7, 0.76, 0.82, 1)
-ambient_light_energy = 1.1
+ambient_light_color = Color(0.78, 0.8, 0.82, 1)
+ambient_light_energy = 1.15
 
 [node name="PcBuildBench" type="Control"]
 layout_mode = 2
@@ -35,10 +35,10 @@ size_flags_stretch_ratio = 1.85
 
 [node name="ViewportMargin" type="MarginContainer" parent="Root/ViewportCard"]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="Root/ViewportCard/ViewportMargin"]
 layout_mode = 2
@@ -111,13 +111,13 @@ theme_override_constants/separation = 6
 
 [node name="TrayTitle" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.88, 1, 1)
+theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 15
 text = "PARTS · drag onto the case"
 
 [node name="SelectedLabel" type="Label" parent="Root/TrayCard/TrayMargin/TrayVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.9)
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 15
 text = "Drag a part into its bay"
 autowrap_mode = 3

@@ -8,9 +8,10 @@ const COMPACT_MAX_WIDTH := 960.0
 ## Single knob for lesson/simulation text size. Page copy and chips were authored
 ## at 10-12px, which testers could not read on a phone, so every authored size is
 ## routed through readable_font() instead of being retuned one call site at a time.
-const READABLE_FONT_BOOST := 1.22
-const READABLE_FONT_MIN := 15
-const READABLE_FONT_MAX := 44
+const READABLE_FONT_BOOST := 1.28
+## Mobile floor raised after panelist review — 17px was still tight on phones.
+const READABLE_FONT_MIN := 18
+const READABLE_FONT_MAX := 46
 
 
 func viewport_size() -> Vector2:

@@ -36,16 +36,17 @@ func setup(id: String, title: String, size: Vector3 = Vector3(0.35, 0.04, 0.25))
 	if _label != null:
 		_label.text = title
 		_label.position = Vector3(0, size.y * 0.5 + 0.06, 0)
-		_label.font_size = 28
-		_label.pixel_size = 0.0045
-		_label.outline_size = 8
+		_label.font_size = 22
+		_label.pixel_size = 0.004
+		_label.outline_size = 6
+		_label.visible = false
 	_refresh_look()
 
 
 func set_highlighted(on: bool) -> void:
 	_highlighted = on
 	_refresh_look()
-	if on and not _occupied:
+	if on:
 		_start_pulse()
 	else:
 		_stop_pulse()
@@ -68,7 +69,7 @@ func _start_pulse() -> void:
 	_pulse_tween = create_tween()
 	_pulse_tween.set_loops()
 	_pulse_tween.tween_property(_mesh, "scale", Vector3(1.08, 1.2, 1.08), 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_pulse_tween.tween_property(_mesh, "scale", Vector3.ONE, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_pulse_tween.tween_property(_mesh, "scale", Vector3(1.02, 1.08, 1.02), 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _stop_pulse() -> void:
@@ -104,11 +105,11 @@ func _ensure_visuals() -> void:
 		_label = Label3D.new()
 		_label.name = "Label"
 		_label.text = label_text
-		_label.font_size = 28
-		_label.pixel_size = 0.0045
-		_label.outline_size = 8
+		_label.font_size = 22
+		_label.pixel_size = 0.004
+		_label.outline_size = 6
 		_label.modulate = Color(0.92, 0.97, 1.0, 0.95)
-		_label.position = Vector3(0, 0.1, 0)
+		_label.position = Vector3(0, 0.12, 0)
 		_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		_label.visible = false
 		add_child(_label)
@@ -117,27 +118,36 @@ func _ensure_visuals() -> void:
 func _refresh_look() -> void:
 	if _mat == null:
 		return
-	if _label != null:
-		_label.visible = _highlighted and not _occupied
-		if _highlighted:
-			_label.modulate = Color(1.0, 0.92, 0.35, 1.0)
-		else:
-			_label.modulate = Color(0.9, 0.95, 1.0, 0.9)
-	if _occupied:
-		_mat.albedo_color = Color(0.12, 0.55, 0.28, 0.5)
-		_mat.emission = Color(0.15, 0.7, 0.35)
-		_mat.emission_energy_multiplier = 0.55
+	# Idle empty bays stay invisible. Yellow glow marks the guided target —
+	# empty bay for install, thin rim around seated part for disassemble.
+	if _occupied and not _highlighted:
 		if _mesh != null:
 			_mesh.visible = false
-	elif _highlighted:
-		_mat.albedo_color = Color(0.95, 0.75, 0.15, 0.65)
-		_mat.emission = Color(1.0, 0.8, 0.2)
-		_mat.emission_energy_multiplier = 1.35
+			_mesh.scale = Vector3.ONE
+		if _label != null:
+			_label.visible = false
+		_set_interactive(true)
+		return
+	if _highlighted:
+		_mat.albedo_color = Color(0.95, 0.78, 0.12, 0.4)
+		_mat.emission = Color(1.0, 0.85, 0.2)
+		_mat.emission_energy_multiplier = 0.8
 		if _mesh != null:
 			_mesh.visible = true
-	else:
-		_mat.albedo_color = Color(0.18, 0.5, 0.7, 0.32)
-		_mat.emission = Color(0.12, 0.42, 0.6)
-		_mat.emission_energy_multiplier = 0.4
-		if _mesh != null:
-			_mesh.visible = true
+			_mesh.scale = Vector3(1.04, 0.4, 1.04) if _occupied else Vector3(1.02, 1.05, 1.02)
+		if _label != null:
+			_label.visible = false
+		_set_interactive(true)
+		return
+	if _mesh != null:
+		_mesh.visible = false
+		_mesh.scale = Vector3.ONE
+	if _label != null:
+		_label.visible = false
+	_set_interactive(false)
+
+
+func _set_interactive(on: bool) -> void:
+	# Empty idle bays must not steal SubViewport picks from small seated parts.
+	input_ray_pickable = on
+	collision_layer = 2 if on else 0

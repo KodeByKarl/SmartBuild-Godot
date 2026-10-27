@@ -14,6 +14,7 @@ One folder = one part.
 | `screwdriver/` | Flathead screwdriver |
 | `monitor/` | Monitor |
 | `keyboard/` | Mechanical keyboard |
+| `cooler/` | CPU Cooler (Fochdog) |
 | `mouse/` | Mouse |
 | `laptop/` | Laptop |
 

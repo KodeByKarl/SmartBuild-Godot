@@ -8,11 +8,11 @@ const BG := Color(0.003921569, 0.09019608, 0.13725491, 1)
 const CYAN := Color(0.09, 0.65, 0.87, 1)
 
 const MODULES: Array[Dictionary] = [
-	{"id": 0, "title": "Module 0 — Introduction"},
-	{"id": 1, "title": "Module 1 — PC Systems"},
-	{"id": 2, "title": "Module 2 — Networks"},
-	{"id": 3, "title": "Module 3 — Servers"},
-	{"id": 4, "title": "Module 4 — Maintenance"},
+	{"id": 0, "title": "Preparatory Module — Introduction"},
+	{"id": 1, "title": "Module 1 — PC Systems (3D)"},
+	{"id": 2, "title": "Module 2 — Networks (lessons)"},
+	{"id": 3, "title": "Module 3 — Servers (lessons)"},
+	{"id": 4, "title": "Module 4 — Maintenance (lessons)"},
 ]
 
 

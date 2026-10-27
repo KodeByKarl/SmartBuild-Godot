@@ -1,4 +1,0 @@
-﻿PART: Ethernet Cable
-MODULE: 2
-CATEGORY: Cabling
-FILE: model.tscn (procedural via Module2PartFactory)

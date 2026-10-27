@@ -1,4 +1,0 @@
-﻿PART: Workstation
-MODULE: 2
-CATEGORY: Endpoints
-FILE: model.tscn (procedural via Module2PartFactory)

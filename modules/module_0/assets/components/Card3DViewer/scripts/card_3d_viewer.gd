@@ -58,13 +58,21 @@ func _ready() -> void:
 
 
 func _freeze_viewport() -> void:
+	# Disable drawing only. Dropping own_world_3d nulls the scenario, and freeing
+	# the slide later logs "Parameter scenario is null".
 	if subviewport != null:
 		subviewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-		subviewport.own_world_3d = false
+		for node in subviewport.find_children("*", "Camera3D", true, false):
+			var cam := node as Camera3D
+			if cam != null:
+				cam.current = false
 	if viewport_container != null:
 		viewport_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if button != null:
+		# Panelist: catalog is image-based — hide Reset/Close 3D controls.
+		button.visible = false
 	if _hint_label != null:
-		_hint_label.text = "3D preview paused (image demo)"
+		_hint_label.text = "Image preview"
 
 
 func _on_resized() -> void:

@@ -25,6 +25,7 @@ assets/models/
 | `psu/` | `model.tscn` | ready | procedural |
 | `atx/` | `model.tscn` | ready | procedural |
 | `case/` | `scene.gltf` | ready | Sketchfab — Meilov PC |
+| `cooler/` | `scene.gltf` | ready | Sketchfab — Fochdog CPU Cooler |
 | `fan/` | `model.tscn` | ready | procedural |
 | `antistatic/` | `model.tscn` | ready | procedural |
 | `screwdriver/` | `scene.gltf` | ready | Sketchfab — lonesomeducky |
