@@ -162,7 +162,7 @@ static func hero(content: VBoxContainer, s: Dictionary) -> void:
 	if after != "":
 		text.add_child(LessonBlocks.make_rich(after, body_size, bold, HORIZONTAL_ALIGNMENT_FILL))
 
-	var art := LessonBlocks.make_art(str(s.get("art", "")), 160.0, 1.4, true)
+	var art := LessonBlocks.make_art(str(s.get("art", "")), 64.0, 1.4, true)
 	art.size_flags_stretch_ratio = float(s.get("art_ratio", 0.45))
 
 	if str(s.get("art_side", "right")) == "left":
@@ -225,10 +225,17 @@ static func cards(content: VBoxContainer, s: Dictionary) -> void:
 static func _equalize_title_heights(titles: Array[Label]) -> void:
 	if titles.is_empty() or not is_instance_valid(titles[0]) or not titles[0].is_inside_tree():
 		return
-	await titles[0].get_tree().process_frame
-	var tallest := 0.0
+	var tree := titles[0].get_tree()
+	# Clear any earlier floor, then wait until the row has its real width so the
+	# wrapped height is measured at that width (not at a one-letter-wide column).
 	for t in titles:
 		if is_instance_valid(t):
+			t.custom_minimum_size.y = 0.0
+	await tree.process_frame
+	await tree.process_frame
+	var tallest := 0.0
+	for t in titles:
+		if is_instance_valid(t) and t.size.x >= 48.0:
 			tallest = maxf(tallest, t.get_combined_minimum_size().y)
 	for t in titles:
 		if is_instance_valid(t):
@@ -276,14 +283,14 @@ static func _step_card(entry: Dictionary, align: int, title_size: int, body_size
 		inner.add_child(text_col)
 		body_box = text_col
 		_card_body(body_box, entry, HORIZONTAL_ALIGNMENT_FILL, body_size)
-		var side_art := LessonBlocks.make_art(art_path, 120.0, 1.0, true)
+		var side_art := LessonBlocks.make_art(art_path, 40.0, 1.0, true)
 		side_art.size_flags_stretch_ratio = 0.9
 		inner.add_child(side_art)
 		return card
 
 	_card_body(body_box, entry, align, body_size)
 	if art_path != "":
-		col.add_child(LessonBlocks.make_art(art_path, 96.0, 1.0, true))
+		col.add_child(LessonBlocks.make_art(art_path, 36.0, 1.0, true))
 	return card
 
 
@@ -424,7 +431,7 @@ static func wide(content: VBoxContainer, s: Dictionary) -> void:
 		col.add_child(f)
 	var art := str(s.get("art", ""))
 	if art != "":
-		col.add_child(LessonBlocks.make_art(art, float(s.get("art_height", 180.0)), 1.0, true))
+		col.add_child(LessonBlocks.make_art(art, float(s.get("art_height", 80.0)), 1.0, true))
 
 
 # --- figma_split -----------------------------------------------------------------
@@ -442,7 +449,7 @@ static func split(content: VBoxContainer, s: Dictionary) -> void:
 
 	var right_art := str(s.get("right_art", ""))
 	if right_art != "":
-		var art := LessonBlocks.make_art(right_art, 180.0, 1.0, true)
+		var art := LessonBlocks.make_art(right_art, 80.0, 1.0, true)
 		art.size_flags_stretch_ratio = 1.0 - float(s.get("left_ratio", 0.3))
 		row.add_child(art)
 		return

@@ -39,7 +39,8 @@ static func mount(root: Control, panel_style: StyleBox = null, tight: bool = fal
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", panel_style if panel_style != null else LessonTheme.panel_style())
+	# No outer frame: the info cards are the only containers on the page.
+	panel.add_theme_stylebox_override("panel", panel_style if panel_style != null else StyleBoxEmpty.new())
 	outer.add_child(panel)
 
 	var inner := MarginContainer.new()
@@ -56,6 +57,7 @@ static func mount(root: Control, panel_style: StyleBox = null, tight: bool = fal
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	# Page-level overflow scroll, not a list: page swipes still start here.
 	scroll.set_meta("swipe_passthrough", true)
 	inner.add_child(scroll)
@@ -189,7 +191,7 @@ static func make_card(title: String, body: String, accent: bool = false, art_pat
 		if fill_art:
 			# Grow into the empty card area. Keep the floor modest so a 2×2
 			# page still fits; the expand flag is what enlarges the drawing.
-			col.add_child(make_art(art_path, 64.0, 1.0, true))
+			col.add_child(make_art(art_path, 36.0, 1.0, true))
 		else:
 			col.add_child(make_art(art_path, 58.0, 1.0, false))
 	return card
