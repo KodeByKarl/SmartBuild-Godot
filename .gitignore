@@ -11,6 +11,3 @@ config/.env.local
 !.env.example
 !config/env.example
 !config/env.example.cfg
-
-# Hidden from GitHub (kept locally)
-/scripts/
